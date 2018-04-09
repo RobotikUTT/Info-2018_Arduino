@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+#Arduino build
+build*
+
+#sublime text project 
+*.sublime-project
+*.sublime-workspace
