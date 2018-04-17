@@ -6,6 +6,7 @@
 
 #include "Arduino.h"
 #include <AnySerial.h>
+#include <NeoSWSerial.h>
 
 /** Defines **/
 /*************/

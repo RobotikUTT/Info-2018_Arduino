@@ -10,14 +10,14 @@
 XBee_SX868::XBee_SX868(AnySerial* anySerial)
 {
   m_serial = anySerial;
-	// if (!m_serial)
-	// 	m_serial->begin(57600);
-	// delay(50);
-	isBusy = true;
-	error_watch = 0;
+  // if (!m_serial)
+  //  m_serial->begin(57600);
+  // delay(50);
+  isBusy = true;
+  error_watch = 0;
   // frame_ID[0] = 'I';
   // frame_ID[1] = 'D';
-  frame_number = 0;
+  frame_number = 1;
   // frame_header = {0x7E, 0x00, 0x18, 0x10, 
   //                     frame_number, 0x00, 0x00, 0x00, 
   //                   0x00, 0x00, 0x00, 0xFF, 
@@ -28,7 +28,7 @@ XBee_SX868::XBee_SX868(AnySerial* anySerial)
 
 }
 
-		
+    
 /*** Destructor **/
 /*****************/
 XBee_SX868::~XBee_SX868()
@@ -42,7 +42,9 @@ XBee_SX868::~XBee_SX868()
 
 
 void XBee_SX868::setChannel(uint8_t mode){  //Paramétrage du channel radio
+  //Serial.println("Until then it's fine");
   openATmode(); //Ouverture du mode commande
+  //Serial.println("still OK");
   m_serial->write('A');  //Commande permettant de modifier le channel d'émission
   m_serial->write('T');
   m_serial->write('C');
@@ -173,9 +175,9 @@ void XBee_SX868::reset(void){
 
 void XBee_SX868::receive (void){
   if(m_serial->available()){ //Si le XBee a quelque chose à nous dire
-
+    //Serial.println("available");
     if(m_serial->read()==0x7E){  //Delimiter de début de trame API
-      new_data = true;
+      //Serial.println("Trame API");
       api_frame[0]=0x7E;
       delay(1);
       int i = 1;
@@ -188,6 +190,7 @@ void XBee_SX868::receive (void){
     }
     if(api_frame[3]==0x8B){ //frame type 0x8B : transmit status - équivalent ACK. Permet de ne pas spammer le port série du XBee.
       if(api_frame[8]==0x00){ //transmit status 0x00 : success
+        //Serial.println("Success");
         for(int j=0; j<=api_frame[2]+4; j++){ //api_frame[2] contient la longueur de la trame, en exlucant le checksum et les 3 premiers octets
           api_frame[j]=0; //on efface la trame API une fois qu'on a fini
         }
@@ -196,6 +199,7 @@ void XBee_SX868::receive (void){
         }
       }
       else{ //Si le transmit status n'est pas un succès
+          //Serial.println("FAIL");
         error_watch++;
         for(int j=0; j<=api_frame[2]+4; j++){
           api_frame[j]=0; //On nettoie la trame API.
@@ -203,9 +207,12 @@ void XBee_SX868::receive (void){
       }
     }
     else if (api_frame[3]==0x90){ //0x90 signale une réception de données par le XBee
+      //Serial.println("data received");  
+      new_data = true;
       decodeFrame(); //on décoe la trame reçue
     }
     else{
+        //Serial.println("garbage");
       for(int j=0; j<=30; j++){
           api_frame[j]=0; //On nettoie la trame API (garbage)
       }
@@ -217,6 +224,7 @@ void XBee_SX868::receive (void){
 void XBee_SX868::send(byte *frame_payload)
 {
   if(((!isBusy) || (busyCnt==0xFFFF)) && (frame_payload[0]!=0) && !m_serial->available()){ //Si le module est dispo et qu'on a une payload à envoyer
+      //Serial.println("is cool");
     //Note : la valeur de BusyCount mise ici permet de forcer une communication avec le module une fois de temps en temps même si il est censé être Busy.
     //Cela permet depasser outre une éventuelle erreur de flag Busy, sans avoir à reset.
     
@@ -243,13 +251,14 @@ void XBee_SX868::send(byte *frame_payload)
   busyCnt = 0;  //Le busycnt est remis à 0
   frame_number++; //Incrémentation du frame_number
     delay(50);
-    while(m_serial->available()){m_serial->read();} //On vide le buffer m_serial, pour ne pas avoir accumulé de latence pendant cette phase d'envoi.
+    //while(m_serial->available()){m_serial->read();} //On vide le buffer m_serial, pour ne pas avoir accumulé de latence pendant cette phase d'envoi.
   }
   else if (isBusy==true){ //Si le module n'est pas prêt à envoyer de trame
+    //Serial.println("busy");
     busyCnt ++;
     if(busyCnt==0xFFFE){
       error_watch++;  //Si le module est Busy pendant trop longtemps, on ajoute une erreur au compteur
-      m_serial->println("XBee busy...");
+      //Serial.println("XBee busy...");
       isBusy = false; //On libère isBusy pour tenter de renvoyer de la donnée, au cas où le module ait planté où une mauvaise manipulation du flag Busy.
     }
   }
@@ -266,6 +275,7 @@ void XBee_SX868::checkStatus (void){
     while(m_serial->available()){m_serial->read();} //On vide les buffers m_serial qui ont pu se remplir pendant le reset
     isBusy = false;//on libère le flag busy, au cas où il ait été mis à 0 avant.
   }
+  isBusy = false;
 }
 
 byte* XBee_SX868::getReceivedPayload()
@@ -298,8 +308,14 @@ bool XBee_SX868::dataAvailable()
 /** Private Methods **/
 /*********************/
 void XBee_SX868::openATmode(void){  //Ouverture du mode AT
-  while(m_serial->available()){m_serial->read();} //On vide le buffer m_serial
+  //Serial.println("Hello handsome");
+  while(m_serial->available())
+  {
+    //Serial.println("while available");
+    m_serial->read();
+  } //On vide le buffer m_serial
   while(!m_serial->available()){ //Tant que le module ne répond pas OK, on continue à demander le mode AT
+    //Serial.println("writing");
     m_serial->write('+');  //Commande pour déclencher le mode AT
     m_serial->write('+');
     m_serial->write('+');
