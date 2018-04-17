@@ -54,6 +54,8 @@ dkms.conf
 #Arduino build
 build*
 
+Makefile
+
 #sublime text project 
 *.sublime-project
 *.sublime-workspace
