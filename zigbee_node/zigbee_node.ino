@@ -1,6 +1,7 @@
 #include <SPI.h>
-#include "mcp2515.h"
+#include <mcp2515.h>
 #include "XBee_SX868.h"
+#include <AnySerial.h>
 #include "SwitchManager.h"
 
 AnySerial XBeeSerial(&Serial);
@@ -38,6 +39,11 @@ void setup()
 	mcp2515.setBitrate(CAN_500KBPS, MCP_16MHZ);  //paramètres les plus rapides testés pour le CAN
 	mcp2515.setNormalMode();
 	delay(200);
+  //pinMode(13, OUTPUT);
+  //digitalWrite(13,HIGH);
+  //delay(1000);
+  //Serial.print("coucou");
+  
 }
 
 void loop()
@@ -54,8 +60,10 @@ void canTransmit (void){  //Transmission CAN (envoi seulement)
   if(received_payload[0]!=0){ //Si on a des données à envoyer
     for(int i=0; i<8; i++){
       canMsgTx.data[i] = received_payload[i]; //On associe la data à la structure CAN
-      Serial.print(canMsgTx.data[i]);
+      //Serial.print(canMsgTx.data[i]);
     }
+    //digitalWrite(13,!digitalRead(13));
+    
     mcp2515.sendMessage(&canMsgTx); //On envoie le message au mcp2515
     delay(10);
     for(int i=0; i<8; i++){
@@ -65,7 +73,8 @@ void canTransmit (void){  //Transmission CAN (envoi seulement)
 }
 
 void getCan (void){
-  if ((mcp2515.readMessage(&canMsgRx) == MCP2515::ERROR_OK)) { //Si le CAN est disponible
+  MCP2515::ERROR can_error = mcp2515.readMessage(&canMsgRx);
+  if (( can_error == MCP2515::ERROR_OK)) { //Si le CAN est disponible
     for (int i = 0; i<canMsgRx.can_dlc+1; i++)
     {
         XBee.send(canMsgRx.data);
@@ -73,7 +82,7 @@ void getCan (void){
     //affiche = 1;  //on autorise l'affichage
     //Serial.println("ERROR_OK");
   }
-  else if (mcp2515.readMessage(&canMsgRx) == MCP2515::ERROR_FAIL) {
+  else if (can_error == MCP2515::ERROR_FAIL) {
     //Serial.println("received stuff but failed");
   }
 }
