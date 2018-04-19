@@ -26,6 +26,8 @@ Author: Apache
 #define SOUND_SPEED		0.3432 //mm/us
 #define TIME_PROPORTION 58
 #define MEASURE_TIMEOUT (uint32_t)MEASURE_DELAY*1000*5
+// the half width of the hysteresis window.
+// set it to 0 if you want every different measure
 #define NEW_MEASURE_HYSTERESIS 3
 
 /** Class Descritpion **/
@@ -36,7 +38,7 @@ class HC_SR04
 		uint8_t 	m_trigger_pin;
 		uint8_t 	m_echo_pin;
 		uint32_t 	m_distance; //measured distance
-		uint32_t 	m_last_distance; //last measured distance
+		uint32_t 	m_last_distance; //previous measured distance
 		//this flag is true when a mesure order is sent 
 		//to the sonar
 		bool 		m_is_measuring; 
