@@ -25,10 +25,10 @@ Author: Apache
 #define MEASURE_DELAY	(uint32_t)60	//ms
 #define SOUND_SPEED		0.3432 //mm/us
 #define TIME_PROPORTION 58
-#define MEASURE_TIMEOUT (uint32_t)MEASURE_DELAY*1000*5
+#define MEASURE_TIMEOUT (uint32_t)MEASURE_DELAY*1000*2
 // the half width of the hysteresis window.
 // set it to 0 if you want every different measure
-#define NEW_MEASURE_HYSTERESIS 3
+#define NEW_MEASURE_HYSTERESIS 0
 
 /** Class Descritpion **/
 
@@ -54,6 +54,8 @@ class HC_SR04
 		//usueful when you have a blocking process
 		//or many sonars
 		bool		m_activated;
+
+		bool		m_timed_out;
 
 		// timestamp of the moment the trigger
 		// pin was set to 1
@@ -93,6 +95,8 @@ class HC_SR04
 		void 		disable();
 		//true if the process is enabled
 		bool		enabled();
+
+		bool 		timedOut();
 
 };
 

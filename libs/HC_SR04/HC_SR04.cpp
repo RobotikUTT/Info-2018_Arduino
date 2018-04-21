@@ -55,13 +55,17 @@ void HC_SR04::update()
 void HC_SR04::enable()
 {
 	m_activated = true;
+	m_measurement_start = micros();
 }
 
 void HC_SR04::disable()
 {
 	m_activated = false;
 	// reset all flags
-	init();
+	m_is_measuring = false;
+	m_waiting_falling_edge = false;
+	m_new_distance = false;
+	m_timed_out = false;
 }
 
 bool HC_SR04::hasNewDistance()
@@ -72,6 +76,11 @@ bool HC_SR04::hasNewDistance()
 bool HC_SR04::enabled()
 {
 	return m_activated;
+}
+
+bool HC_SR04::timedOut()
+{
+	return m_timed_out;
 }
 
 /** Private Methods **/
@@ -135,29 +144,34 @@ void HC_SR04::listenToMeasure()
 		// check if the new measure is out of a 
 		// last_distance-centered window.
 		// if it is, it is considered a new measure.
-		m_new_distance = 
+		/*m_new_distance = 
 			m_distance > m_last_distance + NEW_MEASURE_HYSTERESIS;
 		
 		m_new_distance = 
-			m_new_distance || m_distance < m_last_distance - NEW_MEASURE_HYSTERESIS;
-		
+			m_new_distance || m_distance < m_last_distance - NEW_MEASURE_HYSTERESIS;*/
+		m_new_distance = true;
 		// the new distance becomes the last one
 		m_last_distance = m_distance;
 		// measurement is finished
 		m_is_measuring = false;
 		// therefore we are not waiting for an answer anymore
 		m_waiting_falling_edge = false;
+
+		m_timed_out = false;
 	}
 	// if the answer times out
 	else if (micros() - m_measurement_start > MEASURE_TIMEOUT)
 	{
 		//reseting values for next measure
+		Serial.println("to");
 		m_measurement_start= micros();
 		m_is_measuring = false;
 		m_waiting_falling_edge = false;
 		m_distance = 3000;
 		m_last_distance = m_distance;
 		m_activated = true;
+		m_new_distance = false;
+		m_timed_out = true;
 	}
 }
 
@@ -170,8 +184,10 @@ void HC_SR04::init()
 	m_waiting_falling_edge = false;
 	m_new_distance = false;
 	m_activated = false;
+	m_timed_out = false;
 	m_trigger_micros = 0;
 	m_last_measure_time = 0;
+	
 
 	digitalWrite(m_trigger_pin, LOW);
 }
