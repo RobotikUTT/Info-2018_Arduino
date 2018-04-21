@@ -39,8 +39,7 @@ void setup()
 void loop()
 {
 	pliers.update();
-	sonarArray.update();
-
+    
     getCan();
 	
 }
