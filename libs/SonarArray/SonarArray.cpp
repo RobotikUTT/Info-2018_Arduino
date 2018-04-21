@@ -7,8 +7,6 @@
 SonarArray::SonarArray(uint8_t nbSonars, ...)
 {
 	int _trig_pin, _echo_pin;
-	
-
 	va_list argv;
 	va_start(argv,nbSonars);
 
@@ -25,8 +23,8 @@ SonarArray::SonarArray(uint8_t nbSonars, ...)
 		m_distances.push_back(sonar.getDistance() );
 
 	}
-	m_sonarVector[0].enable();
-
+	
+	m_array_counter = 0;
 	va_end(argv);
 }
 
@@ -47,25 +45,30 @@ SonarArray::~SonarArray()
 void SonarArray::update()
 {
 	
-	for ( uint8_t i = 0; i < m_sonarVector.size() ; i++ )
+	uint8_t i = m_array_counter % m_sonarVector.size();
+	HC_SR04* sonar = &m_sonarVector[i];
+	if ( m_activatedSonars[i] )
 	{
-		HC_SR04* sonar = &m_sonarVector[i];
-		//si on mesure avec ce sonar et qu'on souhaite mesurer avec
-		if ( sonar->enabled() && m_activatedSonars[i] )
+		if ( !sonar->enabled() )
 		{
-			//Serial.print("up s ");
-			//Serial.println(i);
+			sonar->enable();
+		}
 
-			sonar->update();
-			if (sonar->hasNewDistance())
-			{
-				//Serial.println("new dist");
-				m_distances[i] = sonar->getDistance();
-				sonar->disable();
-				m_sonarVector[ (i+1)%m_sonarVector.size() ].enable();
-			}
+		sonar->update();
+		if (sonar->hasNewDistance() || sonar->timedOut())
+		{
+			m_distances[i] = sonar->getDistance();
+			sonar->disable();
+			m_sonarVector[ (i+1)%m_sonarVector.size() ].enable();
+			m_array_counter++;
 		}
 	}
+	else
+	{
+		m_array_counter++;
+	}
+
+	
 }
 
 std::vector<uint16_t> SonarArray::getDistances()
