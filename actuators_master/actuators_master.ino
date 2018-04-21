@@ -5,7 +5,7 @@
 #include "PololuA4983.h"
 #include "Pliers.h"
 #include "canSender.h"
-#include <vector>
+//#include <vector>
 // this arduino is supposed to be pluged on the can bus. I communicates
 // with the other arduino on the board through the hardware serial.
 // It has to read the data from the other arduino and send it on the CAN bus.
@@ -39,7 +39,7 @@ void setup()
 void loop()
 {
 	pliers.update();
-    
+
     getCan();
 	
 }
