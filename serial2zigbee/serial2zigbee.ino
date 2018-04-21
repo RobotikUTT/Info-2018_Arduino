@@ -15,14 +15,9 @@ AnySerial XBeeSerial(&softSerial);
 
 XBee_SX868 XBee(&XBeeSerial);
 SwitchManager switchManager;
-// struct can_frame canMsgRx; //trame CAN à recevoir
-// struct can_frame canMsgTx; //trame CAN à envoyer
-//MCP2515 mcp2515(10);
 
-// void canTransmit (void);
-// void getCan (void);
 void lireMessage();
-
+void decodeFrame(uint8_t* message);
 void checkSerial (void);
 
 void setup()
@@ -36,28 +31,9 @@ void setup()
 	
 	int channel = switchManager.scanChannel();
   delay(50);
-	XBee.setChannel(channel); //char conversion
+	XBee.setChannel(channel);
 	
 	XBee.setAddress(address);
-	//pinMode(13,OUTPUT);
-	//digitalWrite(13,HIGH);
-
-	//On génère la structure de la trame CAN
-	// canMsgTx.can_id  = 0x62;  //L'adresse (de destination) est mise à 0x62 car l'arduino qui va recevoir la trame est bloquée à cette adresse (elle n'a pas de switchs)
-	// canMsgTx.can_dlc = 8; //payload toujours 8
-	// canMsgTx.data[0] = 0x00;  
-	// canMsgTx.data[1] = 0x00;
-	// canMsgTx.data[2] = 0x00;
-	// canMsgTx.data[3] = 0x00;
-	// canMsgTx.data[4] = 0x00;
-	// canMsgTx.data[5] = 0x00;
-	// canMsgTx.data[6] = 0x00;
-	// canMsgTx.data[7] = 0x00;
-
-	// SPI.begin();
-	// mcp2515.reset();
-	// mcp2515.setBitrate(500KBPS, MCP_16MHZ);  //paramètres les plus rapides testés pour le CAN
-	// mcp2515.setNormalMode();
   Serial.println("Noublie pas d'envoyer un caractere de fin de ligne ;)");
 	delay(200);
 	
@@ -78,66 +54,31 @@ void loop()
 
 	}
 	XBee.checkStatus();
-	// canTransmit();
-	// getCan();
 
 }
 
 void checkSerial (void){
   if(Serial.available()){
-  	//Serial.println("available");
     int i = 0;
     byte payload[8];
     while(Serial.available()){
       payload[i]=Serial.read();
       Serial.println(payload[i]);
-      //Serial.print(frame_payload[i]);
       delay(1);//nécessaire sinon on lit plus vite qu'on ne reçoit
       i++;
       if(i>=8){break;}//On ne travaille qu'avec des trames de 8 octets
     }
-    //Serial.println(i);
-   // Serial.println(payload[0]);
+    
     XBee.send(payload);
   }
 }
-
-// void canTransmit (void){  //Transmission CAN (envoi seulement)
-// 	byte* received_payload = XBee.getReceivedPayload();
-//   if(received_payload[0]!=0){ //Si on a des données à envoyer
-//     for(int i=0; i<8; i++){
-//       canMsgTx.data[i] = received_payload[i]; //On associe la data à la structure CAN
-//     }
-//     mcp2515.sendMessage(&canMsgTx); //On envoie le message au mcp2515
-//     delay(10);
-//     for(int i=0; i<8; i++){
-//       received_payload[i]=0;  //On remet la payload à 0 pour ne pas la renvoyer
-//     }
-//   }
-// }
-
-// void getCan (void){
-//   if ((mcp2515.readMessage(&canMsgRx) == MCP2515::ERROR_OK)) { //Si le CAN est disponible
-//     for (int i = 0; i<canMsgRx.can_dlc+1; i++)
-//     {
-//         XBee.send(canMsgRx.data);
-//     }
-//     //affiche = 1;  //on autorise l'affichage
-//     //Serial.println("ERROR_OK");
-//   }
-//   else if (mcp2515.readMessage(&canMsgRx) == MCP2515::ERROR_FAIL) {
-//     //Serial.println("received stuff but failed");
-//   }
-// }
 
 void lireMessage() {
     if (Serial.available()) {
         // Buffer d'entrée
         
         char buffer_in[MAX_TAILLE + 1];
-        //Serial.println("check serial");
         byte size = Serial.readBytesUntil('\n',buffer_in, MAX_TAILLE);
-        //Serial.println("serial read");
         // On ajoute un octet null pour marquer la fin de la String
         buffer_in[size] = 0;
 
@@ -150,16 +91,12 @@ void lireMessage() {
         uint8_t message[MSG_SIZE];
         
         switch (commande) {
-            case HANDSHAKE:
+            case SERIAL_HANDSHAKE:
           {
               // Ack that stm has started
               Serial.println("HANDSHAKE");
-              encodeFrame(message, CAN_HANDSHAKE);
+              encodeFrame(message, HANDSHAKE);
               XBee.send(message);
-              //CanSender::canSend(WHOAMI,16);
-              //Serial.print("HANDSHAKE\n");
-              // CanSender::canSend(SERIAL_INFO, "%d;", order_id);
-              // CanSender::canSend(SERIAL_DEBUG, "Arduino %s has started (%d)", ARDUINO_ID, order_id);
               
               break;
           }
@@ -174,7 +111,7 @@ void lireMessage() {
           //    break;
           //}
   
-          case SPD:
+          case SERIAL_SPD:
           {
               int l, a, t;
           
@@ -193,13 +130,13 @@ void lireMessage() {
               Serial.print(t);
               Serial.print("\n");
               
-              encodeFrame(message, CAN_SPD,l,a,t);
+              encodeFrame(message, SPD,l,a,t);
               XBee.send(message);
               
               break;
           }
   
-          case GET_CODER:
+          case SERIAL_GET_CODER:
           {
               encodeFrame(message, GET_CODER);
               XBee.send(message);
@@ -207,76 +144,73 @@ void lireMessage() {
           }
   
           
-              case HALT:
-              {
-                  Serial.print("STOP");
-                  Serial.print("\n");
-                  encodeFrame(message, GET_CODER,CAN_STOP);
-                  XBee.send(message);
-                  break;
-              }
-              case START:
-              {   
-                  Serial.print("START");
-                  Serial.print("\n");
-                  
-                  encodeFrame(message, CAN_MANAGEMENT, CAN_START);
-                  XBee.send(message);
-                  break;
-              }
-              case PAUSE:
-              {
-                  Serial.print("PAUSE");
-                  Serial.print("\n");
-                  encodeFrame(message, CAN_MANAGEMENT, CAN_PAUSE);
-                  XBee.send(message);
-                  break;
-              }
-              case RESUME:
-              {
-                  Serial.print("RESUME");
-                  Serial.print("\n");
-                  encodeFrame(message, CAN_MANAGEMENT,CAN_RESUME);
-                  XBee.send(message);
-                  break;
-              }
-              case RESET_ID:
-              {
-                  Serial.print("RESET_ID");
-                  Serial.print("\n");
-                  encodeFrame(message, CAN_MANAGEMENT,CAN_STOP);
-                  XBee.send(message);
-                  break;
-              }
-              case SETEMERGENCYSTOP:
-              {
-                  Serial.print("EMGSTOP");
-                  Serial.print("\n");
-                  encodeFrame(message, CAN_MANAGEMENT,CAN_SETEMERGENCYSTOP);
-                  XBee.send(message);
-                  break;
-              }
-              case KILLG:
-              {
-                  Serial.print("NEXT GOAL");
-                  Serial.print("\n");
-                  encodeFrame(message, CAN_MANAGEMENT,CAN_NEXT_ORDER);
-                  XBee.send(message);
-                  break;
-              }
-              case CLEANG:
-              {
-                  Serial.print("RESET GOALS");
-                  Serial.print("\n");
-                  encodeFrame(message, CAN_MANAGEMENT,CAN_RESET_ORDERS);
-                  XBee.send(message);
-                  break;
-              }
+          case SERIAL_HALT:
+          {
+              Serial.print("STOP");
+              Serial.print("\n");
+              encodeFrame(message, GET_CODER,STOP);
+              XBee.send(message);
+              break;
+          }
+          case SERIAL_START:
+          {   
+              Serial.print("START");
+              Serial.print("\n");
               
+              encodeFrame(message, MANAGEMENT, START);
+              XBee.send(message);
+              break;
+          }
+          case SERIAL_PAUSE:
+          {
+              Serial.print("PAUSE");
+              Serial.print("\n");
+              encodeFrame(message, MANAGEMENT, PAUSE);
+              XBee.send(message);
+              break;
+          }
+          case SERIAL_RESUME:
+          {
+              Serial.print("RESUME");
+              Serial.print("\n");
+              encodeFrame(message, MANAGEMENT,RESUME);
+              XBee.send(message);
+              break;
+          }
+          case SERIAL_RESET_ID:
+          {
+              Serial.print("RESET_ID");
+              Serial.print("\n");
+              encodeFrame(message, MANAGEMENT,STOP);
+              XBee.send(message);
+              break;
+          }
+          case SERIAL_SETEMERGENCYSTOP:
+          {
+              Serial.print("EMGSTOP");
+              Serial.print("\n");
+              encodeFrame(message, MANAGEMENT,SETEMERGENCYSTOP);
+              XBee.send(message);
+              break;
+          }
+          case SERIAL_KILLG:
+          {
+              Serial.print("NEXT GOAL");
+              Serial.print("\n");
+              encodeFrame(message, MANAGEMENT,NEXT_ORDER);
+              XBee.send(message);
+              break;
+          }
+          case SERIAL_CLEANG:
+          {
+              Serial.print("RESET GOALS");
+              Serial.print("\n");
+              encodeFrame(message, MANAGEMENT,RESET_ORDERS);
+              XBee.send(message);
+              break;
+          }
   
-          
-  
-          case GOTOA:
+          case SERIAL_GOTOA:
           {
               Serial.print("GOTOA");
               Serial.print("\n");
@@ -291,7 +225,7 @@ void lireMessage() {
               args = strtok(0, ":"); 
               direction =     atoi(args);
               args = strtok(0, ":"); 
-              encodeFrame(message, CAN_GOTOA,x,y,a_int,direction);
+              encodeFrame(message, GOTOA,x,y,a_int,direction);
               XBee.send(message);
   
               
@@ -309,7 +243,7 @@ void lireMessage() {
               break;
           }
   
-          case GOTO:
+          case SERIAL_GOTO:
           {
               Serial.print("GOTO");
               Serial.print("\n");
@@ -322,7 +256,7 @@ void lireMessage() {
               args = strtok(0, ":");  
               direction =     atoi(args);
               args = strtok(0, ":"); 
-              encodeFrame(message, CAN_GOTO,x,y,direction);
+              encodeFrame(message, GOTO,x,y,direction);
               XBee.send(message);
   
               Serial.print(x);
@@ -334,7 +268,7 @@ void lireMessage() {
               break;
           }
   
-          case ROT:
+          case SERIAL_ROT:
           {
               Serial.print("ROT");
               Serial.print("\n");
@@ -343,7 +277,7 @@ void lireMessage() {
                
               a_int =     atoi(args);
               
-              encodeFrame(message, CAN_ROT,a_int);
+              encodeFrame(message, ROT,a_int);
               XBee.send(message);
   
               Serial.print(a_int);
@@ -353,7 +287,7 @@ void lireMessage() {
               break;
           }
   
-          case ROTNOMODULO:
+          case SERIAL_ROTNOMODULO:
           {
               Serial.print("ROT NO MODULO");
               Serial.print("\n");
@@ -364,7 +298,7 @@ void lireMessage() {
               args = strtok(0, ":"); 
               
               
-              encodeFrame(message, CAN_ROTNOMODULO,a_int);
+              encodeFrame(message, ROTNOMODULO,a_int);
               XBee.send(message);
               Serial.print(a_int);
               Serial.print("\n");
@@ -373,9 +307,9 @@ void lireMessage() {
               break;
           }
   
-          case PIDLEFT:
-          case PIDRIGHT:
-          case PIDALL:
+          case SERIAL_PIDLEFT:
+          case SERIAL_PIDRIGHT:
+          case SERIAL_PIDALL:
           {
               long p_int, i_int, d_int;
               
@@ -399,22 +333,22 @@ void lireMessage() {
               
   
               
-              if (commande == PIDLEFT)
+              if (commande == SERIAL_PIDLEFT)
               {
                   Serial.print("PID LEFT");
                   Serial.print("\n");
-                  encodeFrame(message, CAN_PIDLEFT,p_int,i_int,d_int);
+                  encodeFrame(message, PIDLEFT,p_int,i_int,d_int);
               }
-              else if (commande == PIDRIGHT)
+              else if (commande == SERIAL_PIDRIGHT)
               {
                   Serial.print("PID RIGHT");
                   Serial.print("\n");
-                  encodeFrame(message, CAN_PIDRIGHT,p_int,i_int,d_int);
+                  encodeFrame(message, PIDRIGHT,p_int,i_int,d_int);
               }
               else
               {
                 Serial.print("PID ALL\n");
-                encodeFrame(message, CAN_PIDALL,p_int,i_int,d_int);
+                encodeFrame(message, PIDALL,p_int,i_int,d_int);
               }
               Serial.println("about to send");
               XBee.send(message);
@@ -422,7 +356,7 @@ void lireMessage() {
               break;
           }
   
-          case PWM:
+          case SERIAL_PWM:
           {
               Serial.print("PWM");
               Serial.print("\n");
@@ -436,7 +370,7 @@ void lireMessage() {
               t =     atoi(args);
               args = strtok(0, ":"); 
               
-              encodeFrame(message, CAN_PWM,l,r,t);
+              encodeFrame(message, PWM,l,r,t);
               XBee.send(message);
   
               Serial.print(l);
@@ -450,7 +384,7 @@ void lireMessage() {
               break;
           }
   
-          case SET_POS:
+          case SERIAL_SET_POS:
           {
               Serial.print("SET POS");
               Serial.print("\n");
@@ -463,7 +397,7 @@ void lireMessage() {
               a_int =     atoi(args);
               args = strtok(0, ":"); 
               
-              encodeFrame(message, CAN_SET_POS,x,y,a_int);
+              encodeFrame(message, SET_POS,x,y,a_int);
               XBee.send(message);
               
   
@@ -474,17 +408,12 @@ void lireMessage() {
               Serial.print(a_int);
               Serial.print("\n");
   
-              
-  
-  
-  
-              
               break;
           }
   
-          case ACCMAX:
+          case SERIAL_ACCMAX:
           {
-              Serial.print("SET PARAM");
+              Serial.print("SET PARAM|");
               Serial.print("\n");
               int16_t r_int, s,a;
               
@@ -495,16 +424,15 @@ void lireMessage() {
               a =     atoi(args);
               args = strtok(0, ":"); 
               
-              encodeFrame(message, CAN_SET_PARAM,s,r_int,a);
+              encodeFrame(message, SET_PARAM,s,r_int,a);
               XBee.send(message);
   
               Serial.print(s);
-              Serial.print("\n");
+              Serial.print("|");
               Serial.print(r_int);
-              Serial.print("\n");
+              Serial.print("|");
               Serial.print(a);
-              Serial.print("\n");
-  
+              Serial.println("|");
               
               break;
           }
@@ -513,4 +441,420 @@ void lireMessage() {
         
     }
     
+}
+
+void decodeFrame(uint8_t* message)
+{
+    uint8_t mode = message[0];
+    switch (mode) 
+    {
+        case HANDSHAKE:
+        {           
+            Serial.println("HANDSHAKE");
+
+            break;
+        }
+
+        case WHOAMI:
+        {
+            Serial.print("WHOAMI : ");
+            switch(message[1])
+            {
+                case ALL_ADDR:
+                    Serial.println("ALL");
+                    break;
+
+                case BBB_ADDR:
+                    Serial.println("BBB");
+                    break;
+
+                case STM_ADDR:
+                    Serial.println("STM");
+                    break;
+
+                case ARDUINO_ADDR:
+                    Serial.println("ARD");
+                    break;
+
+                case ZIGBEE_ADDR:
+                    Serial.println("ZIG B");
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        case SET_MODE:
+        {
+            Serial.print("SET MODE|");
+            break;
+        }
+
+        case SPD :
+        {
+            int linear, angular;
+            unsigned int duration;
+            linear   = message[1] << 8 | message[2];
+            angular  = message[3] << 8 | message[4];
+            duration = message[5] << 8 | message[6];
+            
+            Serial.print("|");
+            Serial.print(linear);
+            Serial.print("|");
+            Serial.print(angular);
+            Serial.print("|");
+            Serial.print(duration);
+            Serial.println("|");
+            
+            break;
+        }
+
+        case GET_CODER :
+        {
+
+            int left_wheel_dist, right_wheel_dist;
+            
+            left_wheel_dist  = message[1] << 8 | message[2];
+            right_wheel_dist = message[3] << 8 | message[4];
+
+            Serial.print("l wheel dist ");
+            Serial.println(left_wheel_dist);
+            Serial.print("r wheel dist");
+            Serial.println(left_wheel_dist);
+            
+            break;
+        }
+
+        case MANAGEMENT :
+        {
+            
+          switch(message[1])
+          {
+            case STOP :
+            {
+                Serial.println("STOP");
+                break;
+            }
+    
+            case START :
+            {
+                Serial.println("START");
+                break;
+            }
+    
+            case PAUSE :
+            {
+                Serial.println("PAUSE");
+                break;
+            }
+    
+            case RESUME :
+            {
+                Serial.println("RESUME");
+                break;
+            }
+    
+            case RESET_ID :
+            {
+                Serial.println("RESET ID");
+                break;
+            }
+    
+            case SETEMERGENCYSTOP :
+            {
+                Serial.println("EMG STOP");
+                break;
+            }
+    
+            case NEXT_ORDER :
+            {
+                Serial.println(" NEXT ORDER");
+                break;
+            }
+    
+            case RESET_ORDERS :
+            {
+                Serial.println("RST ORDERS");
+                break;
+            }
+            default:
+              break;
+          }
+          
+          break;
+        }
+
+        case GOTOA :
+        {
+            int x, y, angle_int;
+            unsigned char direction;
+            
+            x           = message[1] << 8 | message[2];
+            y           = message[3] << 8 | message[4];
+            angle_int   = message[5] << 8 | message[6];
+            direction   = message[7];
+
+            Serial.println("GOTOA");
+            Serial.print("x ");
+            Serial.println(x);
+            Serial.print("y ");
+            Serial.println(y);
+            Serial.print("angle");
+            Serial.println((float)angle_int/FLOAT_PRECISION);
+
+            break;
+        }
+
+        case GOTO :
+        {
+            int x, y;
+            unsigned char direction;
+            
+            x           = message[1] << 8 | message[2];
+            y           = message[3] << 8 | message[4];
+            direction   = message[5];
+            
+            Serial.println("GOTO");
+            Serial.print("x ");
+            Serial.println(x);
+            Serial.print("y ");
+            Serial.println(y);
+            Serial.print("direction");
+            Serial.println(direction);
+            break;
+        }
+
+        case ROT :
+        {
+            int angle_int;
+            angle_int = message[1] << 8 | message[2];
+            Serial.println("ROT");
+            Serial.print("angle ");
+            Serial.println((float)angle_int/FLOAT_PRECISION);
+            break;
+        }
+
+        case ROTNOMODULO :
+        {
+            int angle_int;
+            angle_int = message[1] << 8 | message[2];
+            Serial.println("ROT NO MODULO");
+            Serial.print("angle ");
+            Serial.println((float)angle_int/FLOAT_PRECISION);
+            break;
+        }
+
+        case PIDLEFT :
+        case PIDRIGHT :
+        case PIDALL :
+        {
+            unsigned int p,i,d;
+            p = message[1] | message[2];
+            i = message[3] | message[4];
+            d = message[5] | message[6];
+
+            if ( mode == PIDLEFT)
+            {
+                Serial.println("PID LEFT");
+            }
+            else if (mode == PIDRIGHT)
+            {
+                Serial.println("PID RIGHT");
+            }
+            else
+            {
+                Serial.println("PID ALL");
+            }
+
+            Serial.print("p ");
+            Serial.println(p);
+            Serial.print("i ");
+            Serial.println(i);
+            Serial.print("d ");
+            Serial.println(d);
+            break;
+        }
+
+        case PWM :
+        case CURRENT_PWM :
+        {
+            int pwm_left, pwm_right;
+            
+            pwm_left  = message[1] << 8 | message[2];
+            pwm_right = message[3] << 8 | message[4];
+
+            if (mode == PWM)
+            {
+                Serial.print("PWM    ");
+            }
+            else
+            {
+                Serial.print("PWM|");
+            }
+
+            //Serial.print("left ");
+            Serial.print(pwm_left);
+            Serial.print("|");
+            Serial.print(pwm_right);
+            Serial.print("  ");
+            break;
+        }
+
+        case SET_POS :
+        case CURRENT_POS :
+        {
+            int x, y, angle_int;
+            
+            x           = message[1] << 8 | message[2];
+            y           = message[3] << 8 | message[4];
+            angle_int   = message[5] << 8 | message[6];
+            
+            if (mode == SET_POS)
+            {
+                Serial.print("SET POS    ");
+            }
+            else
+            {
+                Serial.print ("POS|");
+            }
+
+            Serial.print(x);
+            Serial.print("|");
+            Serial.print(y);
+            Serial.print("|");
+            Serial.print(angle_int);
+            Serial.print("  ");
+            break;
+        }
+
+        case SET_PARAM :
+        {
+            unsigned int max_linear_speed, max_angular_speed,max_acceleration;
+            
+            max_linear_speed  = message[1] << 8 | message[2];
+            max_angular_speed = message[3] << 8 | message[4];
+            max_acceleration  = message[5] << 8 | message[6];
+
+            Serial.println("SET PARAM");
+            Serial.print("max lin spd ");
+            Serial.println(max_linear_speed);
+            Serial.print("max ang spd ");
+            Serial.println(max_angular_speed);
+            Serial.print("max acc");
+            Serial.println(max_acceleration);
+            
+            break;
+        }
+
+        case CURRENT_SPD :
+        {
+            int linear_speed, left_wheel_speed, right_wheel_speed;
+            linear_speed        = message[1] << 8 | message[2];
+            left_wheel_speed    = message[3] << 8 | message[4];
+            right_wheel_speed   = message[5] << 8 | message[5];
+            
+            Serial.print("SPD|");
+            //Serial.print("lin   ");
+            Serial.print(linear_speed);
+            Serial.print("|");
+            Serial.print(left_wheel_speed);
+            Serial.print("|");
+            Serial.println(right_wheel_speed);
+            
+            break;
+        }
+
+        case MOVE_PLIERS :
+        {
+            unsigned char level;
+            level = message[1];
+
+            Serial.println("MOVE PLIERS");
+            Serial.print("lvl ");
+            Serial.println(level);
+
+        
+            
+            break;
+        }
+
+        case CLOSE_OPEN_PLIERS :
+        {
+            unsigned char order;
+            order = message[1];
+            if ( order > 0 )
+            {
+                Serial.println("CLOSE PLIERS");
+            }
+            else
+            {
+                Serial.println("OPEN PLIERS");
+            }
+            
+            
+            break;
+        }
+
+        case SONAR_DISTANCE :
+        {
+            unsigned char sonar_id;
+            unsigned int distance;
+            sonar_id = message[1];
+            distance = message[2] << 8 | message[3];
+            
+            Serial.println("SONAR");
+            Serial.print("id ");
+            Serial.println(sonar_id);
+            Serial.print("dist ");
+            Serial.println(distance);
+            
+            break;
+        }
+
+        case THROW_BALLS :
+        {
+            
+            Serial.println("THROW");
+            
+            break;
+        }
+
+        case OBJECT_ON_MAP:
+        {
+            Serial.print("OBJECT");
+            uint8_t obj_ID;
+            int16_t x,y;
+            uint16_t radius;
+            
+            obj_ID = message[1];
+            x      = message[2] << 8 | message[3];
+            y      = message[4] << 8 | message[5];
+            radius = message[6] << 8 | message[7];
+            Serial.print("|");
+            Serial.print(obj_ID);
+            Serial.print("|");
+            Serial.print(x);
+            Serial.print("|");
+            Serial.print(y);
+            Serial.print("|");
+            Serial.print(radius);
+            Serial.println("|");
+            break;
+        }
+
+        default:
+            Serial.println("DATA");
+            for (uint8_t i = 0; i< MSG_SIZE ; i++)
+            {
+              Serial.print("|");
+              Serial.print(message[i]);
+              
+            }
+            Serial.println("|");
+            break;
+
+    }
 }
