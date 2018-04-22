@@ -25,6 +25,11 @@ PololuA4983::PololuA4983(int step_pin, int dir_pin, int en_pin)
 	
 }
 
+PololuA4983::PololuA4983(int step_pin, int dir_pin)
+{
+	PololuA4983(step_pin,dir_pin,0);
+}
+
 /*** Destructor **/
 /*****************/
 PololuA4983::~PololuA4983()
@@ -97,12 +102,18 @@ void PololuA4983::moveRevolution(uint16_t nb_rev, bool dir)
 
 void PololuA4983::enable()
 {
-	digitalWrite(m_en_pin, ENABLE);
+	if (m_en_pin > 0)
+	{
+		digitalWrite(m_en_pin, ENABLE);
+	}
 }
 
 void PololuA4983::disable()
 {
-	digitalWrite(m_en_pin, DISABLE);	
+	if (m_en_pin > 0)
+	{
+		digitalWrite(m_en_pin, DISABLE);
+	}
 }
 
 void PololuA4983::stop()

@@ -30,6 +30,7 @@ class PololuA4983
 
 	public:
 		PololuA4983(int step_pin, int dir_pin, int en_pin);
+		PololuA4983(int step_pin, int dir_pin);
 		~PololuA4983();
 		void moveStep(uint16_t nb_steps, bool dir);
 		void moveRevolution(uint16_t nb_rev, bool dir);
