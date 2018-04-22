@@ -3,7 +3,7 @@
 #include <NeoSWSerial.h>
 #include <AnySerial.h>
 #include "protocol.h"
-#include "mcp2515.h"
+#include <mcp2515.h>
 #include "XBee_SX868.h"
 #include "SwitchManager.h"
 #define MAX_TAILLE  30
@@ -460,23 +460,23 @@ void decodeFrame(uint8_t* message)
             Serial.print("WHOAMI : ");
             switch(message[1])
             {
-                case ALL_ADDR:
+                case ALL_CAN_ADDR:
                     Serial.println("ALL");
                     break;
 
-                case BBB_ADDR:
+                case BBB_CAN_ADDR:
                     Serial.println("BBB");
                     break;
 
-                case STM_ADDR:
+                case STM_CAN_ADDR:
                     Serial.println("STM");
                     break;
 
-                case ARDUINO_ADDR:
+                case ARDUINO_CAN_ADDR:
                     Serial.println("ARD");
                     break;
 
-                case ZIGBEE_ADDR:
+                case ZIGBEE_CAN_ADDR:
                     Serial.println("ZIG B");
                     break;
 
