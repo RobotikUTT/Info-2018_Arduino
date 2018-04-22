@@ -41,7 +41,7 @@ void loop()
 	pliers.update();
 
     getCan();
-	
+	CanSender::canSendTask();
 }
 
 void getCan (void){
