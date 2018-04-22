@@ -330,13 +330,24 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
         }
         case SONAR_DISTANCE :
         {
-            unsigned char sonar_id;
-            unsigned int distance;
-            sonar_id = va_arg(argv, int);
-            distance = va_arg(argv,int);
-            message[1] = sonar_id;
-            message[2] = distance >> 8;
-            message[3] = distance;
+            uint8_t distance_sonar_0;
+            uint8_t distance_sonar_1;
+            uint8_t distance_sonar_2;
+            uint8_t distance_sonar_3;
+            uint8_t distance_sonar_4;
+            
+            distance_sonar_0 = va_arg(argv, char);
+            distance_sonar_1 = va_arg(argv, char);
+            distance_sonar_2 = va_arg(argv, char);
+            distance_sonar_3 = va_arg(argv, char);
+            distance_sonar_4 = va_arg(argv, char);
+
+            message[0] = SONAR_DISTANCE;
+            message[1] = distance_sonar_0;
+            message[2] = distance_sonar_1;
+            message[3] = distance_sonar_2;
+            message[4] = distance_sonar_3;
+            message[5] = distance_sonar_4;
             
             break;
         }
