@@ -12,14 +12,12 @@
 // this arduino controls the pliers (a stepper, an AX12 and a limit switch)
 // it also controls a L298 double H-bridge (aka the ball thrower)
 
-#define SERIAL_DELAY	100
 
-// void updateCan (void);
 void decodeFrame(uint8_t* message);
 
 void getCan (void);
 void readSerial(void);
-PololuA4983 stepper(STEP_PIN,DIR_PIN,EN_PIN);
+PololuA4983 stepper(STEPPER_A_STEP,STEPPER_A_DIR);
 Pliers pliers(&stepper, PLIERS_LIMIT_SWITCH_PIN);
 
 MCP2515 mcp2515(SPI_SS_PIN);
@@ -50,11 +48,7 @@ void getCan (void){
 	{
 		if (( can_error == MCP2515::ERROR_OK)) //Si le CAN est disponible
 		{ 
-		
-		decodeFrame(canRxMsg.data);		
-		}
-		else if (can_error == MCP2515::ERROR_FAIL) {
-		//Serial.println("received stuff but failed");
+            decodeFrame(canRxMsg.data);		
 		}
 	}
 }
@@ -66,13 +60,14 @@ void decodeFrame(uint8_t* message)
     {
         case HANDSHAKE:
         {           
-        	CanSender::canSend(WHOAMI,ARDUINO_CAN_ADDR);
+            uint8_t answer[MSG_SIZE];
+            encodeFrame(answer, WHOAMI,ARDUINO_CAN_ADDR);
+        	CanSender::canSend(answer);
             break;
         }
 
         case SET_MODE:
         {
-        	CanSender::canSend(ORDER_COMPLETED,SET_MODE);
             break;
         }
 
@@ -82,7 +77,7 @@ void decodeFrame(uint8_t* message)
         {
             unsigned char level;
             level = message[1];
-
+            pliers.setLevel(level);
             break;
         }
 
@@ -117,4 +112,8 @@ void decodeFrame(uint8_t* message)
 void readSerial()
 {
     // Management of the slave arduino
+    if (Serial.available() > 0)
+    {
+
+    }
 }
