@@ -62,7 +62,7 @@ public:
     ~CanSender() {}
     //to be used everywhere
     //todo check why its only working with minimal 1 variadic argument
-    static void canSend(uint8_t mode, ...);
+    static void canSend(uint8_t* message);
     // static void static void canSend(canProtocolEnum mode, String data);
     //to be used in the task
     static void canSendTask();

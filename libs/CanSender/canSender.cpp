@@ -23,52 +23,8 @@ CanSender::CanSender() {
 //     }
 // }
 
-void CanSender::canSend(uint8_t mode, ...)
+void CanSender::canSend(uint8_t* message)
 {
-    uint8_t i, j, count = 0;
-    uint8_t message[] = {0, 0, 0, 0, 0, 0, 0, 0};
-    // String serialData, tmpString = "";
-        va_list argv;
-        va_start(argv, mode);
-        switch(mode)        
-        {
-            case WHOAMI:
-                int id;
-                id = va_arg(argv, int);
-                message[0] = mode;
-                message[1] = id;
-                break;
-
-            case SONAR_DISTANCE:
-                int sonar_id ;
-                unsigned int distance;
-                
-
-                sonar_id = va_arg(argv, int);
-                distance = va_arg(argv, unsigned int);
-                message[0] = mode;
-                // TODO: find how to cast in the right type
-                //MSB first
-                message[1] = sonar_id;
-                
-                message[2] = distance >> 8;
-                message[3] = distance;
-
-                break;
-
-            case THROW_BALLS:
-                
-                message[0] = mode;
-
-                break;
-
-            default:
-                break;
-
-        }
-
-    va_end(argv);
-
     for (uint8_t i = 0 ; i < 8 ; i++)
     {
         dataToSend.push(message[i]);    
