@@ -8,20 +8,12 @@
 
 #include "canSender.h"
 
-
-//#include "QueueList.h"
-
 /* Initialize static members */
 QueueList<uint8_t> CanSender::dataToSend;
 
 CanSender::CanSender() {
 }
 
-// void CanSender::canSend(canProtocolEnum mode, String data) {
-//     if (mode <= DEBUG_LEVEL & data != "") {
-//         dataToSend.push(data);
-//     }
-// }
 
 void CanSender::canSend(uint8_t* message)
 {
