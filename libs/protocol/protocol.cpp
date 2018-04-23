@@ -88,7 +88,7 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             case STOP:
             {
                 message[0] = MANAGEMENT;
-                message[1] = mode;
+                message[1] = STOP;
                 
                 break;
             }

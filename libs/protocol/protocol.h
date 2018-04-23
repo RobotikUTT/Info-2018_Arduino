@@ -62,6 +62,8 @@
 #define THROW_BALLS			24
 #define OBJECT_ON_MAP		25
 #define ORDER_COMPLETED		26
+#define SET_SERVO			27
+
 
 #define SERIAL_HANDSHAKE   'h'
 #define SERIAL_START       'S'     //no args, start the program
