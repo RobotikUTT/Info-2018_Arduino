@@ -148,7 +148,7 @@ void lireMessage() {
           {
               Serial.print("STOP");
               Serial.print("\n");
-              encodeFrame(message, GET_CODER,STOP);
+              encodeFrame(message, MANAGEMENT,STOP);
               XBee.send(message);
               break;
           }
