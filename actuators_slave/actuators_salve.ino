@@ -16,10 +16,11 @@
 
 #define SERIAL_DELAY	100
 
-SonarArray sonarArray((uint8_t)4,SONAR_1_TRIG,SONAR_1_ECHO,
-			 SONAR_2_TRIG,SONAR_2_ECHO,
-			 SONAR_3_TRIG,SONAR_3_ECHO,
-			 SONAR_4_TRIG,SONAR_4_ECHO);
+SonarArray sonarArray((uint8_t)4,SONAR_FRONT_L_TRIG,SONAR_FRONT_L_ECHO,
+			 SONAR_FRONT_R_TRIG,SONAR_FRONT_R_ECHO,
+			 SONAR_L_TRIG,SONAR_L_ECHO,
+			 SONAR_R_TRIG,SONAR_R_ECHO,
+             SONAR_BACK_TRIG,SONAR_BACK_ECHO);
 
 void decodeFrame(uint8_t* message);
 
@@ -59,13 +60,11 @@ void decodeFrame(uint8_t* message)
     {
         case HANDSHAKE:
         {           
-        	CanSender::canSend(WHOAMI,ARDUINO_CAN_ADDR);
             break;
         }
 
         case SET_MODE:
         {
-        	CanSender::canSend(ORDER_COMPLETED,SET_MODE);
             break;
         }
 
@@ -73,33 +72,16 @@ void decodeFrame(uint8_t* message)
 
         case MOVE_PLIERS :
         {
-            unsigned char level;
-            level = message[1];
-
             break;
         }
 
         case CLOSE_OPEN_PLIERS :
         {
-            unsigned char order;
-            order = message[1];
-            if ( order > 0 )
-            {
-
-            }
-            else
-            {
-
-            }
-            
-            
             break;
         }
 
         case THROW_BALLS :
         {
-            
-            
             break;
         }
         default:
