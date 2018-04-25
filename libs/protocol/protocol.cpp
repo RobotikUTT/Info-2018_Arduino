@@ -11,8 +11,9 @@
 
 bool flagArduinoConnected = false;
 
-void encodeFrame(uint8_t* message, uint8_t mode, ...)
+uint8_t encodeFrame(uint8_t* message, uint8_t mode, ...)
 {
+    uint8_t message_size = 0;
 
     for (uint8_t i = 0 ; i < MSG_SIZE ; i++)
     {
@@ -26,21 +27,24 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
     {
         case HANDSHAKE:
         {           
-            message[0] = mode;
+            message[0] = HANDSHAKE;
+            message_size = 1;
 
             break;
         }
 
         case WHOAMI:
         {
-            message[0] = mode;
+            message[0] = WHOAMI;
             message[1] = ARDUINO_CAN_ADDR;
+            message_size = 2;
             break;
         }
 
         case SET_MODE:
         {
-            message[0] = mode;
+            message[0] = SET_MODE;
+            message_size = 1;
             break;
         }
 
@@ -59,6 +63,7 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[4] = angular;
             message[5] = duration >> 8;
             message[6] = duration;
+            message_size = 7;
             
             break;
         }
@@ -76,6 +81,7 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[3] = right_wheel_dist >> 8;
             message[4] = right_wheel_dist;
             
+            message_size = 5;
             break;
         }
 
@@ -85,6 +91,7 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
           order = va_arg(argv,int);
           switch (order)
           {
+            message_size = 2;
             case STOP:
             {
                 message[0] = MANAGEMENT;
@@ -148,9 +155,14 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
                 
                 break;
             }
+
             default:
-              break;    
+            {
+                message_size = 0;
+                break;    
+            }
           }
+
             break;
         }
 
@@ -173,6 +185,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[5] = angle_int >> 8;
             message[6] = angle_int;
             
+            message_size = 7;
+
             break;
         }
 
@@ -187,6 +201,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[2] = x;
             message[3] = y >> 8;
             message[4] = y;
+
+            message_size = 5;
             break;
         }
 
@@ -199,6 +215,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[1] = angle_int >> 8;
             message[2] = angle_int;
             
+            message_size = 3;
+
             break;
         }
 
@@ -210,6 +228,9 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[0] = ROTNOMODULO;
             message[1] = angle_int >> 8;
             message[2] = angle_int;
+
+            message_size = 3;
+
             break;
         }
 
@@ -218,13 +239,9 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
         case PIDALL :
         {
             unsigned int p,i,d;
-            Serial.println("in case");
             p = va_arg(argv, unsigned int);
-            Serial.println("p OK");
             i = va_arg(argv, unsigned int);
-            Serial.println("I OK");
             d = va_arg(argv, unsigned int);
-            Serial.println("D OK");
             
             message[0] = mode;
             message[1] = p >> 8;
@@ -233,6 +250,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[4] = i;
             message[5] = d >> 8;
             message[6] = d;
+
+            message_size = 7;
             
             break;
         }
@@ -249,6 +268,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[2] = pwm_left;
             message[3] = pwm_right >> 8;
             message[4] = pwm_right;
+
+            message_size = 5;
             
             break;
         }
@@ -269,6 +290,7 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[5] = angle_int >> 8;
             message[6] = angle_int;
             
+            message_size = 7;
             
             break;
         }
@@ -287,6 +309,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[4] = max_angular_speed;
             message[5] = max_acceleration >> 8;
             message[6] = max_acceleration;
+
+            message_size = 7;
             
             break;
         }
@@ -305,6 +329,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[5] = right_wheel_speed >>8;
             message[6] = right_wheel_speed;
             
+            message_size = 7;
+
             break;
         }
         case MOVE_PLIERS :
@@ -315,6 +341,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[0] = MOVE_PLIERS;
             message[1] = level;
             
+            message_size = 2;
+
             break;
         }
 
@@ -326,6 +354,8 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[0] = CLOSE_OPEN_PLIERS;
             message[1] = order;
             
+            message_size = 2;
+
             break;
         }
         case SONAR_DISTANCE :
@@ -336,11 +366,11 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             uint8_t distance_sonar_3;
             uint8_t distance_sonar_4;
             
-            distance_sonar_0 = va_arg(argv, char);
-            distance_sonar_1 = va_arg(argv, char);
-            distance_sonar_2 = va_arg(argv, char);
-            distance_sonar_3 = va_arg(argv, char);
-            distance_sonar_4 = va_arg(argv, char);
+            distance_sonar_0 = va_arg(argv, int);
+            distance_sonar_1 = va_arg(argv, int);
+            distance_sonar_2 = va_arg(argv, int);
+            distance_sonar_3 = va_arg(argv, int);
+            distance_sonar_4 = va_arg(argv, int);
 
             message[0] = SONAR_DISTANCE;
             message[1] = distance_sonar_0;
@@ -349,18 +379,39 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
             message[4] = distance_sonar_3;
             message[5] = distance_sonar_4;
             
+            message_size = 6;
+
             break;
         }
         case THROW_BALLS :
         {
             message[0] = THROW_BALLS;
-            
+                
+            message_size = 1;
+
             break;
         }
 
         case ORDER_COMPLETED:
         {
             message[0] = ORDER_COMPLETED;
+            message_size = 1;
+            break;
+        }
+
+        case SET_SERVO:
+        {
+            uint8_t sonarID;
+            uint8_t angle;
+
+            sonarID = va_arg(argv, int);
+            angle = va_arg(argv, int);
+
+            message[0] = SET_SERVO;
+            message[1] = sonarID;
+            message[2] = angle;
+
+            message_size = 3;
             break;
         }
 
@@ -371,4 +422,5 @@ void encodeFrame(uint8_t* message, uint8_t mode, ...)
 
     va_end(argv);
 
+    return message_size;
 }

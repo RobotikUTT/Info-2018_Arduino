@@ -110,6 +110,7 @@
 #define MAX_RESPONSE_LEN 50
 
 #define MSG_SIZE	8
+#define BAUDRATE	57600
 
 
 
@@ -126,7 +127,7 @@
 
 extern bool flagArduinoConnected;
 void parseAndExecuteOrder(uint8_t* message);
-void encodeFrame(uint8_t* message,uint8_t mode, ...);
+uint8_t encodeFrame(uint8_t* message,uint8_t mode, ...);
 
 // uint8_t getLog10(const uint16_t number);
 // void ProtocolAutoSendStatus();
