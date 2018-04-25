@@ -5,6 +5,7 @@
 #include "PololuA4983.h"
 #include "Pliers.h"
 #include "canSender.h"
+#include "MotorControl.h"
 //#include <vector>
 // this arduino is supposed to be pluged on the can bus. I communicates
 // with the other arduino on the board through the hardware serial.
@@ -16,7 +17,10 @@
 void decodeFrame(uint8_t* message);
 
 void getCan (void);
-void readSerial(void);
+void readSlave();
+void writeSlave(uint8_t* message,  uint8_t size);
+
+MotorControl ballThrower();
 PololuA4983 stepper(STEPPER_A_STEP,STEPPER_A_DIR);
 Pliers pliers(&stepper, PLIERS_LIMIT_SWITCH_PIN);
 
@@ -29,7 +33,7 @@ struct can_frame canTxMsg; //trame CAN à envoyer
 uint32_t orderMillis = millis();
 void setup()
 {
-	Serial.begin(57600);
+	Serial.begin(BAUDRATE);
 
 	pliers.reset();
 }
@@ -39,12 +43,15 @@ void loop()
 	pliers.update();
 
     getCan();
+    readSlave();
 	CanSender::canSendTask();
+
 }
 
 void getCan (void){
   	MCP2515::ERROR can_error = mcp2515.readMessage(&canRxMsg);
-	if (canRxMsg.can_id == ARDUINO_CAN_ADDR)
+	if ( canRxMsg.can_id == ARDUINO_CAN_ADDR || 
+         canRxMsg.can_id == ALL_CAN_ADDR )
 	{
 		if (( can_error == MCP2515::ERROR_OK)) //Si le CAN est disponible
 		{ 
@@ -104,16 +111,58 @@ void decodeFrame(uint8_t* message)
             
             break;
         }
+
+        case SONAR_DISTANCE:
+        {
+            uint8_t answer[MSG_SIZE];
+
+            //int conversion for variadic arguments function
+            int dist0 = message[1];
+            int dist1 = message[2];
+            int dist2 = message[3];
+            int dist3 = message[4];
+            int dist4 = message[5];
+            encodeFrame(answer, 
+                SONAR_DISTANCE, dist0, dist1, dist2, dist3, dist4);
+            CanSender::canSend(answer);
+            break;
+        }
+
+        case SET_SERVO:
+        {
+            uint8_t answer[MSG_SIZE];
+            uint8_t sonarID = message[1];
+            uint8_t angle   = message[2];
+            uint8_t size = encodeFrame(answer, SET_SERVO, sonarID, angle);
+            writeSlave(answer,size);
+
+
+            break;
+        }
+
         default:
             break;
 
     }
 }
-void readSerial()
+void readSlave()
 {
     // Management of the slave arduino
     if (Serial.available() > 0)
     {
-
+        uint8_t buffer_in[MSG_SIZE];
+        Serial.readBytesUntil('\n',(char*)buffer_in, MSG_SIZE);
+        decodeFrame(buffer_in);
     }
 }
+
+void writeSlave(uint8_t* message, uint8_t size)
+{
+    for (uint8_t i = 0; i < size; i++)
+    {
+        Serial.write(message[i]);
+    }
+
+    Serial.print('\n');
+}
+
