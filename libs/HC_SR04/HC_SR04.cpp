@@ -163,7 +163,7 @@ void HC_SR04::listenToMeasure()
 	else if (micros() - m_measurement_start > MEASURE_TIMEOUT)
 	{
 		//reseting values for next measure
-		Serial.println("to");
+		//Serial.println("to");
 		m_measurement_start= micros();
 		m_is_measuring = false;
 		m_waiting_falling_edge = false;
