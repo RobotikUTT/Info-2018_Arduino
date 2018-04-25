@@ -13,8 +13,8 @@
 #define SONAR_5_ECHO	13
 #define SONAR_5_TRIG	12
 
-#define SEVRVO_0		5
-#define SEVRVO_1		6
+#define SERVO_0		5
+#define SERVO_1		6
 
 #define SONAR_FRONT_L_ECHO	SONAR_0_ECHO
 #define SONAR_FRONT_L_TRIG	SONAR_0_TRIG
@@ -26,8 +26,7 @@
 #define SONAR_R_TRIG		SONAR_3_TRIG
 #define SONAR_BACK_ECHO		SONAR_4_ECHO
 #define SONAR_BACK_TRIG		SONAR_4_TRIG
-// #define SONAR_5_ECHO	13
-// #define SONAR_5_TRIG	12
+
 
 
 #define UP 			true
