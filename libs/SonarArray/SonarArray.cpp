@@ -119,5 +119,37 @@ void SonarArray::disableAll()
 		m_activatedSonars[i] = false;
 	}
 }
+
+std::vector<uint8_t> SonarArray::getNormalizedDistances()
+{
+	std::vector<uint8_t> normVect;
+	for (uint8_t i = 0; i < m_sonarVector.size(); i++ )
+	{
+		uint8_t temp_dist;
+		// temp_dist = map(m_distances[i],
+		// 	LOWEST_DIST, MAX_DIST, LOWEST_NORM,MAX_NORM);
+		temp_dist = m_distances[i]/10;
+		if (temp_dist > 255)
+		{
+			temp_dist = 255;
+		}
+		normVect.push_back(temp_dist);
+	}
+	return normVect;
+}
+
+bool SonarArray::detectTooClose()
+{
+	bool res = false;
+
+	for (uint8_t i = 0; i < m_sonarVector.size(); ++i)
+	{
+		res = res || 
+			(m_activatedSonars[i] && 
+				m_distances[i] < CLOSEST_DIST_BEFORE_WARN) ;
+	}
+
+	return res;
+}
 /** Private Methods **/
 /*********************/

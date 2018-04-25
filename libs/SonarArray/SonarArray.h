@@ -13,7 +13,11 @@
 /** Defines **/
 /*************/
 
-
+#define LOWEST_DIST	0
+#define MAX_DIST	3000
+#define LOWEST_NORM	0
+#define MAX_NORM	255
+#define CLOSEST_DIST_BEFORE_WARN	300
 /** Class Descritpion **/
 
 class SonarArray
@@ -58,6 +62,10 @@ class SonarArray
 		void enableAll();
 		// disable all sonars
 		void disableAll();
+
+		std::vector<uint8_t> getNormalizedDistances();
+
+		bool detectTooClose();
 };
 
 
