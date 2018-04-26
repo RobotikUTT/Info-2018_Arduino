@@ -12,3 +12,6 @@
 #define MOTOR_B_EN	5
 #define MOTOR_B_I1	2
 #define MOTOR_B_I2	4
+
+#define SERVO_ABEILLE_ORANGE	3
+#define SERVO_ABEILLE_VERT		9
