@@ -34,6 +34,7 @@
 #define SETEMERGENCYSTOP 	5
 #define NEXT_ORDER			6
 #define RESET_ORDERS		7
+#define UNSETEMERGENCYSTOP	8
 
 
 #define HANDSHAKE			0
@@ -63,6 +64,8 @@
 #define OBJECT_ON_MAP		25
 #define ORDER_COMPLETED		26
 #define SET_SERVO			27
+#define ROBOT_BLOCKED		28
+#define ACTION_PLIERS		29
 
 
 #define SERIAL_HANDSHAKE   'h'
@@ -94,6 +97,7 @@
 #define SERIAL_PINGPING 	'z'		// no args, switch led state
 #define SERIAL_WHOAMI 		'w' 	// no args, answers 'ASSERV' or 'PAP'
 #define SERIAL_SETEMERGENCYSTOP 'A'	// enable(int)
+#define SERIAL_UNSETEMERGENCYSTOP 'B'
 
 // END_ORDERS - Do not remove this comment
 

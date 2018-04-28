@@ -156,6 +156,14 @@ uint8_t encodeFrame(uint8_t* message, uint8_t mode, ...)
                 break;
             }
 
+            case UNSETEMERGENCYSTOP :
+            {
+                message[0] = MANAGEMENT;
+                message[1] = UNSETEMERGENCYSTOP;
+                
+                break;
+            }
+
             default:
             {
                 message_size = 0;
