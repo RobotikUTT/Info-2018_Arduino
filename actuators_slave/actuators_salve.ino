@@ -15,7 +15,7 @@
 // it also controls a L298 double H-bridge (aka the ball thrower)
 
 #define SONAR_DELAY	            100
-#define EMERGENCY_SONAR_DELAY   30
+#define EMERGENCY_SONAR_DELAY   SONAR_DELAY
 
 void readMaster();
 void writeMaster(uint8_t* message, uint8_t size);
