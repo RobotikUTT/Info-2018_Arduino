@@ -56,7 +56,7 @@ void MotorControl::setSpeed(int pwm)
 		}
 		
 	}
-	Serial.println(pwm);
+	//Serial.println(pwm);
 	analogWrite(m_enable_pin, abs(pwm));
 }
 

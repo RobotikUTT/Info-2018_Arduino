@@ -55,24 +55,26 @@ uint8_t lineFollower::photoState(uint8_t photo_num)
 	}
 }
 
-uint8_t lineFollower::lineCase()
+LinePositionType lineFollower::lineCase()
 {
+	LinePositionType linePos;
 	if ((photoState(1) == 0) && (photoState(2) == 1) && (photoState(3) == 0))
 	{
-		return 1; //sur la ligne
+		linePos = LINE_CENTER; //sur la ligne
 	}
 	else if ((photoState(2) == 0) && (photoState(3) == 1) && (photoState(4) == 0))
 	{
-		return 2; //robot a gauche de la ligne
+		linePos = LINE_LEFT; //robot a gauche de la ligne
 	}
 	else if ((photoState(0) == 0) && (photoState(1) == 1) && (photoState(2) == 0))
 	{
-		return 3; //robot a droite de la ligne
+		linePos = LINE_RIGHT; //robot a droite de la ligne
 	}
 	else
 	{
-		return 0; //position ne correspond a aucun cas
+		linePos = LINE_LOST; //position ne correspond a aucun cas
 	}
+	return linePos;
 }
 /** Private Methods **/
 /*********************/
