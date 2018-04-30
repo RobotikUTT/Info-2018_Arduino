@@ -12,7 +12,7 @@
 #include <Wire.h>
 #include <SonarSRF08.h>
 
-#define MAIN_08_ADDRESS (0xF8 >> 1)
+#define MAIN_08_ADDRESS 0x70 // (0xE0 >> 1) //par defaut : 0xF8
 
 // Setup Analogue Gain
 // http://www.robot-electronics.co.uk/htm/srf08tech.html section "Analogue Gain"
@@ -53,7 +53,7 @@ void setup()
 {
   Serial.begin(9600);
   Serial.println("ok1");
-  //MainSonar.writeAddress(0xF8);
+  //MainSonar.writeAddress(0xF8); //fonctionne pas (changer valeur adresse ?)
 
   MainSonar.begin();
   isConnected("SRF08", MainSonar.readVersion());
@@ -61,5 +61,7 @@ void setup()
 
 void loop()
 {
-  distance("SRF08", MainSonar.readRange(unit));
+  Serial.println("ok2");
+  //distance("SRF08", MainSonar.readRange(unit));
+  MainSonar.readRange(unit);
 }
