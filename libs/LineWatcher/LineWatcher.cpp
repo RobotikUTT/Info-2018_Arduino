@@ -68,15 +68,15 @@ LineColor LineWatcher::photoState(uint8_t photo_num)
 LinePositionType LineWatcher::lineCase()
 {
 	LinePositionType linePos;
-	if ((photoState(1) == BLACK) && (photoState(2) == WHITE) && (photoState(3) == BLACK))
+	if ((photoState(0) == WHITE) && (photoState(1) == BLACK) && (photoState(2) == WHITE) && (photoState(3) == BLACK) && (photoState(4) == WHITE))
 	{
 		linePos = LINE_CENTER; //sur la ligne
 	}
-	else if ((photoState(2) == BLACK) && (photoState(3) == WHITE) && (photoState(4) == BLACK))
+	else if ((photoState(0) == WHITE) && (photoState(1) == WHITE) && (photoState(2) == BLACK) && (photoState(3) == WHITE) && (photoState(4) == BLACK))
 	{
 		linePos = LINE_LEFT; //robot a gauche de la ligne
 	}
-	else if ((photoState(0) == BLACK) && (photoState(1) == WHITE) && (photoState(2) == WHITE))
+	else if ((photoState(0) == BLACK) && (photoState(1) == WHITE) && (photoState(2) == WHITE) && (photoState(3) == WHITE) &&(photoState(4) == WHITE))
 	{
 		linePos = LINE_RIGHT; //robot a droite de la ligne
 	}

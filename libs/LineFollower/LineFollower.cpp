@@ -6,27 +6,30 @@
 /** Constructor **/
 /*****************/
 
-LineFollower::LineFollower()
+LineFollower::LineFollower(LineWatcher *watcher, MotorControl *motor)
 {
-	
+	m_watcher = watcher;
+	m_motor = motor;
 }
 
 /** Public Methods **/
 /********************/
-
-/*void LineFollower::update()
+void LineFollower::update()
 {
-	switch (lineCase()) {
-	case 2:
-		//eteindre moteur droit
+	switch (m_watcher->lineCase()) {
+	case LINE_CENTER:
+		
 		break;
-	case 3:
-		//eteindre moteur gauche
+	case LINE_LEFT:
+		
+		break;
+	case LINE_RIGHT:
+
 		break;
 	default:
 		break;
 	}
-}*/
+}
 
 
 /** Private Methods **/

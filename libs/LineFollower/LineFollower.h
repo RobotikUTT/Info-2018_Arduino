@@ -5,6 +5,9 @@
 /**************/
 
 #include "Arduino.h"
+#include <LineWatcher.h>
+#include <Motor.h>
+#include <MotorControl.h>
 
 /** Defines **/
 /*************/
@@ -14,10 +17,12 @@
 class LineFollower
 {
 	private:
-		
+		LineWatcher* m_watcher;
+		MotorControl* m_motor;
 
 	public:
-		LineFollower();
+		LineFollower(LineWatcher *watcher, MotorControl *motor);
+		void update();
 		
 
 };

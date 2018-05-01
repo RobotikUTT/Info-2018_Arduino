@@ -5,7 +5,7 @@
 #define LEFT_FOREWARD_SENS		1
 #define RIGHT_FOREWARD_SENS		1
 
-#define LIGHT_THRESHOLD_WHITE 300
+#define LIGHT_THRESHOLD_WHITE 150
 #define LIGHT_THRESHOLD_BLACK 150
 
 //Regression lineaire : y = m*x+b

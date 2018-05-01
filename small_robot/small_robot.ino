@@ -9,13 +9,14 @@
 Servo servoAbeilleOrange;
 Servo servoAbeilleVert;
 
+LineWatcher watcher(LIGHT_THRESHOLD_WHITE, LIGHT_THRESHOLD_BLACK, PHOTO_0, PHOTO_1, PHOTO_2, PHOTO_3, PHOTO_4, PHOTO_0_ERROR_M, PHOTO_1_ERROR_M, PHOTO_2_ERROR_M, PHOTO_3_ERROR_M, PHOTO_4_ERROR_M, PHOTO_0_ERROR_B, PHOTO_1_ERROR_B, PHOTO_2_ERROR_B, PHOTO_3_ERROR_B, PHOTO_4_ERROR_B);//enregistrement des pins
+
 Motor leftMotor(LEFT_MOTOR_EN, LEFT_MOTOR_I1, LEFT_MOTOR_I2, LEFT_FOREWARD_SENS);
 Motor rightMotor(RIGHT_MOTOR_EN, RIGHT_MOTOR_I1, RIGHT_MOTOR_I2, RIGHT_FOREWARD_SENS);
 
 MotorControl motor(&leftMotor, &rightMotor);
 
-LineWatcher watcher(LIGHT_THRESHOLD_WHITE, LIGHT_THRESHOLD_BLACK, PHOTO_0, PHOTO_1, PHOTO_2, PHOTO_3, PHOTO_4, PHOTO_0_ERROR_M, PHOTO_1_ERROR_M, PHOTO_2_ERROR_M, PHOTO_3_ERROR_M, PHOTO_4_ERROR_M, PHOTO_0_ERROR_B, PHOTO_1_ERROR_B, PHOTO_2_ERROR_B, PHOTO_3_ERROR_B, PHOTO_4_ERROR_B);//enregistrement des pins
-
+LineFollower follower(&watcher, &motor);
 
 void setup()
 {
@@ -26,9 +27,11 @@ void setup()
 
 void loop()
 {
-	for(int i = 0 ; i <= 4 ; i++)
+	for(int i = 4 ; i >= 0 ; i--)
 	{
 		Serial.print(watcher.photoState(i));
+		Serial.print("  /  ");
+		Serial.print(watcher.photoVal(i));
 		Serial.print("  |  ");
 	}
 	Serial.println();
