@@ -11,6 +11,13 @@
 
 /** Defines **/
 /*************/
+typedef enum{
+	LEFT,
+	FORDWARD,
+	RIGHT,
+	BACKWARD,
+	UNKNOWN
+}CrossroadsDirection;
 
 /** Class Descritpion **/
 
@@ -22,7 +29,9 @@ class LineFollower
 
 	public:
 		LineFollower(LineWatcher *watcher, MotorControl *motor);
+		void NextCrossroads(CrossroadsDirection direction);
 		void update();
+		CrossroadsDirection m_direction;
 		
 
 };

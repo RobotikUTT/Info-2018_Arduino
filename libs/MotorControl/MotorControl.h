@@ -11,8 +11,8 @@
 /*************/
 
 typedef enum{
-	LEFT_CROSSROADS,
-	LEFT_LINE,
+	LEFT_CROSSROADS,//pour intersection
+	LEFT_LINE,//pour tourner quand on quitte la ligne
 	CENTER,
 	RIGHT_LINE,
 	RIGHT_CROSSROADS
@@ -27,11 +27,17 @@ class MotorControl
 		Motor* m_right_motor;
 		int16_t m_left_pwm;
 		int16_t m_right_pwm;
+		uint8_t m_sensitivity;
+		int16_t m_direction;
+		int16_t m_pwm;
+		float m_analog_sensitivity;
 
 
 	public:
-		MotorControl(Motor *left_motor, Motor *right_motor);
-		direction(Direction direction); //-2:virage croisement gauche |1:tourner à gauche pour se remettre sur la ligne |0:continuer tout droit |1 et 2: pareil à droite
+		MotorControl(Motor *left_motor, Motor *right_motor, uint8_t sensitivity, float analog_sensitivity, uint8_t pwm_speed);
+		//void direction(Direction direction);
+		void analogDirection(Direction direction, uint16_t rotation);
+		void update();
 
 };
 

@@ -13,7 +13,8 @@ typedef enum{
 	LINE_LOST,
 	LINE_LEFT,
 	LINE_RIGHT,
-	LINE_CENTER
+	LINE_CENTER,
+	LINE_CROSSROADS_1
 }LinePositionType;
 
 typedef enum{
@@ -46,7 +47,7 @@ class LineWatcher
 		1 : sur la ligne
 		2 : robot a gauche de la ligne
 		3 : robot a droite de la ligne*/
-
+		LinePositionType lineSide();
 
 
 };

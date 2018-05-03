@@ -40,10 +40,14 @@ void SonarSRF::begin(void)
 /// <param name="addressRegister">SRF Location 0</param>
 void SonarSRF::write(unsigned int command, unsigned int addressRegister)
 {
+    // Serial.print("\t\tsend command: ");
+    // Serial.println(command);
     Wire.beginTransmission(_address); // Start I2C transmission
     Wire.write((uint8_t)(addressRegister));
     if (command != 0)
     {
+        // Serial.println("\t\tsend command != 0");
+
         Wire.write((uint8_t)(command)); // Send command
         if (_gainRegister && _rangeLocation)
         {
@@ -52,6 +56,8 @@ void SonarSRF::write(unsigned int command, unsigned int addressRegister)
         }
     }
     Wire.endTransmission(); // End I2C transmission
+    // Serial.println("\t\tendTransmission");
+
 }
 
 /// <summary>
@@ -108,7 +114,11 @@ int SonarSRF::read(unsigned int command, unsigned int length)
 {
     write(0x00, command);
     Wire.requestFrom(_address, (uint8_t)(length)); // Request length bytes
+    // Serial.print("\tREAD wait: ");
+    // Serial.println(length);
+
     while (Wire.available() < length); // Wait for result while bytes available
+    // Serial.println("\tREAD end wait");
     int res; // Read the bytes, and combine them into one int
     for (; length > 0; length--)
     {
@@ -132,7 +142,7 @@ uint16_t SonarSRF::readRange(char unit, bool andStart)
         writeUnit(unit);
         waitForCompletion();
     }
-
+    // Serial.println("READ range function");
     return (uint16_t)(read(RANGE_REGISTER, 2));
 }
 
@@ -142,6 +152,8 @@ uint16_t SonarSRF::readRange(char unit, bool andStart)
 /// <returns>The software revision (one byte)</returns>
 int8_t SonarSRF::readVersion(void)
 {
+    // Serial.println("test revision");
+    // delay(1);
     return (int8_t)(read(SOFTWARE_REVISION, 1));
 }
 
@@ -150,8 +162,10 @@ int8_t SonarSRF::readVersion(void)
 /// </summary>
 void SonarSRF::waitForCompletion(void)
 {
+    // Serial.println("entered loop");
     while (readVersion() == -1)
     {
+        // Serial.println("loop");
         delay(1);
     }
 }
