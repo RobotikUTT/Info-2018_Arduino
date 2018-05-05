@@ -1,20 +1,20 @@
 #include "Arduino.h"
 
-#define SONAR_0_ECHO	A0
-#define SONAR_0_TRIG	A1
-#define SONAR_1_ECHO	4
-#define SONAR_1_TRIG	2
-#define SONAR_2_ECHO	A2
-#define SONAR_2_TRIG	A3
-#define SONAR_3_ECHO	8
-#define SONAR_3_TRIG	7
-#define SONAR_4_ECHO	9
-#define SONAR_4_TRIG	10
-#define SONAR_5_ECHO	13
+#define SONAR_0_ECHO	10
+#define SONAR_0_TRIG	11
+#define SONAR_1_ECHO	8
+#define SONAR_1_TRIG	9
+#define SONAR_2_ECHO	6
+#define SONAR_2_TRIG	7
+#define SONAR_3_ECHO	A0
+#define SONAR_3_TRIG	13
+#define SONAR_4_ECHO	A2
+#define SONAR_4_TRIG	A1
+#define SONAR_5_ECHO	A3
 #define SONAR_5_TRIG	12
 
-#define SERVO_0		5
-#define SERVO_1		6
+#define SERVO_0		3
+#define SERVO_1		5
 
 #define SONAR_FRONT_L_ECHO	SONAR_0_ECHO
 #define SONAR_FRONT_L_TRIG	SONAR_0_TRIG
