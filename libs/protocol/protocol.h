@@ -67,6 +67,9 @@
 #define ROBOT_BLOCKED		28
 #define ACTION_PLIERS		29
 
+#define	PLIERS_TAKE			1
+#define PLIERS_RELEASE		0
+
 
 #define SERIAL_HANDSHAKE   'h'
 #define SERIAL_START       'S'     //no args, start the program
