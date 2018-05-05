@@ -6,6 +6,7 @@
 #include "Pliers.h"
 #include "canSender.h"
 #include "MotorControl.h"
+
 //#include <vector>
 // this arduino is supposed to be pluged on the can bus. I communicates
 // with the other arduino on the board through the hardware serial.
@@ -24,6 +25,7 @@ MotorControl ballThrower();
 PololuA4983 stepper(STEPPER_A_STEP,STEPPER_A_DIR);
 Pliers pliers(&stepper, PLIERS_LIMIT_SWITCH_PIN);
 
+
 MCP2515 mcp2515(SPI_SS_PIN);
 
 struct can_frame canRxMsg;  //strcture de la trame CAN reçue
@@ -35,7 +37,15 @@ void setup()
 {
 	Serial.begin(BAUDRATE);
 
-	pliers.reset();
+    canTxMsg.can_id  = BBB_CAN_ADDR;  //L'adresse (de destination) est mise à 0x62 car l'arduino qui va recevoir la trame est bloquée à cette adresse (elle n'a pas de switchs)
+    canTxMsg.can_dlc = 8; //payload toujours 8
+    SPI.begin();
+    mcp2515.reset();
+    mcp2515.setBitrate(CAN_500KBPS, MCP_16MHZ);  //paramètres les plus rapides testés pour le CAN
+    mcp2515.setNormalMode();
+
+
+    pliers.begin();
 }
 
 void loop()
@@ -67,6 +77,7 @@ void decodeFrame(uint8_t* message)
     {
         case HANDSHAKE:
         {           
+            Serial.println("HANDSHAKE");
             uint8_t answer[MSG_SIZE];
             encodeFrame(answer, WHOAMI,ARDUINO_CAN_ADDR);
         	CanSender::canSend(answer);
@@ -82,6 +93,7 @@ void decodeFrame(uint8_t* message)
 
         case MOVE_PLIERS :
         {
+            Serial.println("MOVE PLIERS");
             unsigned char level;
             level = message[1];
             pliers.setLevel(level);
@@ -90,6 +102,7 @@ void decodeFrame(uint8_t* message)
 
         case CLOSE_OPEN_PLIERS :
         {
+            Serial.println("CLOSE OPEN PLIERS");
             unsigned char order;
             order = message[1];
             if ( order > 0 )
@@ -107,7 +120,7 @@ void decodeFrame(uint8_t* message)
 
         case THROW_BALLS :
         {
-            
+            Serial.println("THROW_BALLS");
             
             break;
         }
@@ -138,6 +151,27 @@ void decodeFrame(uint8_t* message)
 
 
             break;
+        }
+        case ACTION_PLIERS:
+        {
+            uint8_t action, level;
+
+            action = message[1];
+            level  = message[2];
+
+            cube_action_t cubeAction;
+
+            if (action == PLIERS_TAKE)
+            {
+                cubeAction = TAKE;
+            }
+            else if (action == PLIERS_RELEASE)
+            {
+                cubeAction = RELEASE;
+            }
+
+            pliers.addAction(cubeAction, level);
+
         }
 
         default:
