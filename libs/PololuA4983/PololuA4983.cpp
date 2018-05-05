@@ -22,6 +22,7 @@ PololuA4983::PololuA4983(int step_pin, int dir_pin, int en_pin)
 	digitalWrite(m_step_pin, LOW);
 	digitalWrite(m_dir_pin,  LOW);
 	enable();
+	m_flagFifoEmpty = true;
 	
 }
 
@@ -44,6 +45,7 @@ void PololuA4983::update()
 {
 	if (m_remaining_steps != 0)
 	{
+		m_flagFifoEmpty = false;
 		if ( m_remaining_steps > 0)
 		{
 			digitalWrite(m_dir_pin, HIGH);
@@ -77,27 +79,27 @@ void PololuA4983::update()
 
 
 	}
-}
-
-void PololuA4983::moveStep(uint16_t nb_steps, bool dir)
-{
-	
-	if (dir)
-	{
-		
-		m_remaining_steps += nb_steps;
-	}
 	else
 	{
-		
-		m_remaining_steps -= nb_steps;
+		if (m_goalsList.count() > 0)
+		{
+			m_remaining_steps = m_goalsList.pop();
+		}
+		else
+		{
+			m_flagFifoEmpty = true;
+		}
 	}
-	
 }
 
-void PololuA4983::moveRevolution(uint16_t nb_rev, bool dir)
+void PololuA4983::moveStep(int16_t nb_steps)
 {
-	moveStep(STEP_PER_REVOLUTION * nb_rev, dir);
+	m_goalsList.push(nb_steps);
+}
+
+void PololuA4983::moveRevolution(int16_t nb_rev)
+{
+	moveStep(STEP_PER_REVOLUTION * nb_rev);
 }
 
 void PololuA4983::enable()
@@ -119,6 +121,11 @@ void PololuA4983::disable()
 void PololuA4983::stop()
 {
 	m_remaining_steps = 0;
+}
+
+bool PololuA4983::fifoEmpty()
+{
+	return m_flagFifoEmpty;
 }
 
 /** Private Methods **/
