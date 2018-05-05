@@ -6,16 +6,54 @@
 
 #include "Arduino.h"
 #include "PololuA4983.h"
+#include "AnySerial.h"
+#include "AX12A.h"
+#include "NeoSWSerial.h"
+#include "QueueList.h"
 // #include "AX12.h"
 
 /** Defines **/
 /*************/
-#define MIN_LEVEL 1
+
+#define AX12_TX		2
+#define AX12_RX		3
+
+#define SERVO_ID 0x01               
+#define SERVO_CONTROL_PIN A5
+#define SERVO_BAUDRATE 38400 
+
+#define OPEN_ANGLE		800
+#define CLOSED_ANGLE	700
+
+#define MIN_LEVEL 0
 #define MAX_LEVEL 4
-#define UP 	true
-#define DOWN false
+#define UP 	1
+#define DOWN -1*UP
 #define STEP_PER_LEVEL STEP_PER_REVOLUTION*2
 #define LIMIT_SWITCH_PRESSED	HIGH
+
+typedef enum{
+	TAKE,
+	RELEASE
+}cube_action_t;
+
+typedef enum{
+	PREPARING_ELEVATOR,
+	PREPARING_PLIERS,
+	ACTION_ELEVATOR,
+	ACTION_CUBE,
+	RESET_ELEVATOR,
+	RESET_PLIERS
+}action_phase_t;
+
+typedef struct 
+{
+	cube_action_t action;
+	uint8_t level;
+	action_phase_t phase = PREPARING_ELEVATOR;
+	bool done = false;
+	
+}pliers_action_t;
 
 /** Class Descritpion **/
 
@@ -23,9 +61,10 @@ class Pliers
 {
 	private:
 		PololuA4983* m_stepper;
-		int16_t m_limit_switch_pin;
+		uint8_t m_limit_switch_pin;
 		uint8_t m_current_level;
-		// AX12 m_ax12;
+		pliers_action_t m_currentAction;
+		QueueList<pliers_action_t> m_actionList;
 
 	public:
 		Pliers(PololuA4983* stepper,int limit_switch_pin);
@@ -35,6 +74,8 @@ class Pliers
 		void open();
 		void close();
 		void reset();
+		void begin();
+		void addAction(cube_action_t action, uint8_t level);
 
 
 };
