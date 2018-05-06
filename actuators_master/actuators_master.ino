@@ -21,12 +21,13 @@ void getCan (void);
 void readSlave();
 void writeSlave(uint8_t* message,  uint8_t size);
 
-MotorControl ballThrower();
+MotorControl* ballThrower;
+//MotorControl* motor2;
 PololuA4983 stepper(STEPPER_A_STEP,STEPPER_A_DIR);
-Pliers pliers(&stepper, PLIERS_LIMIT_SWITCH_PIN);
+Pliers* pliers;
 
 
-MCP2515 mcp2515(SPI_SS_PIN);
+MCP2515* mcp2515;
 
 struct can_frame canRxMsg;  //strcture de la trame CAN reçue
 struct can_frame canTxMsg; //trame CAN à envoyer
@@ -39,18 +40,29 @@ void setup()
 
     canTxMsg.can_id  = BBB_CAN_ADDR;  //L'adresse (de destination) est mise à 0x62 car l'arduino qui va recevoir la trame est bloquée à cette adresse (elle n'a pas de switchs)
     canTxMsg.can_dlc = 8; //payload toujours 8
+
+    mcp2515 = new MCP2515(SPI_SS_PIN);
     SPI.begin();
-    mcp2515.reset();
-    mcp2515.setBitrate(CAN_500KBPS, MCP_16MHZ);  //paramètres les plus rapides testés pour le CAN
-    mcp2515.setNormalMode();
+    mcp2515->reset();
+    mcp2515->setBitrate(CAN_500KBPS, MCP_16MHZ);  //paramètres les plus rapides testés pour le CAN
+    mcp2515->setNormalMode();
 
+    ballThrower = new MotorControl(MOTOR_A_EN,MOTOR_A_IN_1, MOTOR_A_IN_2,HIGH);
+    ballThrower->setSpeed(255);
 
-    pliers.begin();
+    pliers = new Pliers(&stepper, PLIERS_LIMIT_SWITCH_PIN);
+    
+
+    pliers->begin();
+    Serial.println("begin");
+    cube_action_t action = TAKE;
+
+    pliers->addAction(action, 1);
 }
 
 void loop()
 {
-	pliers.update();
+	pliers->update();
 
     getCan();
     readSlave();
@@ -59,7 +71,7 @@ void loop()
 }
 
 void getCan (void){
-  	MCP2515::ERROR can_error = mcp2515.readMessage(&canRxMsg);
+  	MCP2515::ERROR can_error = mcp2515->readMessage(&canRxMsg);
 	if ( canRxMsg.can_id == ARDUINO_CAN_ADDR || 
          canRxMsg.can_id == ALL_CAN_ADDR )
 	{
@@ -93,26 +105,21 @@ void decodeFrame(uint8_t* message)
 
         case MOVE_PLIERS :
         {
+            //DEPRECATED
             Serial.println("MOVE PLIERS");
             unsigned char level;
             level = message[1];
-            pliers.setLevel(level);
+            //pliers->setLevel(level);
             break;
         }
 
         case CLOSE_OPEN_PLIERS :
         {
+            // DEPRECATED
             Serial.println("CLOSE OPEN PLIERS");
             unsigned char order;
             order = message[1];
-            if ( order > 0 )
-            {
-
-            }
-            else
-            {
-
-            }
+            
             
             
             break;
@@ -154,6 +161,7 @@ void decodeFrame(uint8_t* message)
         }
         case ACTION_PLIERS:
         {
+            Serial.println("action pliers");
             uint8_t action, level;
 
             action = message[1];
@@ -170,7 +178,7 @@ void decodeFrame(uint8_t* message)
                 cubeAction = RELEASE;
             }
 
-            pliers.addAction(cubeAction, level);
+            pliers->addAction(cubeAction, level);
 
         }
 
