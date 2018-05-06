@@ -1,12 +1,7 @@
 #include "pins.h"
-#include <SPI.h>
-#include <mcp2515.h>
 #include "protocol.h"
-#include "PololuA4983.h"
-#include "Pliers.h"
 #include "HC_SR04.h"
 #include "SonarArray.h"
-#include "canSender.h"
 #include <vector>
 // this arduino is supposed to be pluged on the can bus. I communicates
 // with the other arduino on the board through the hardware serial.
