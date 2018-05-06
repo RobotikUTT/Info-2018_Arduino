@@ -84,6 +84,8 @@ void PololuA4983::update()
 		if (m_goalsList.count() > 0)
 		{
 			m_remaining_steps = m_goalsList.pop();
+			m_flagFifoEmpty = false;
+			
 		}
 		else
 		{
@@ -126,6 +128,11 @@ void PololuA4983::stop()
 bool PololuA4983::fifoEmpty()
 {
 	return m_flagFifoEmpty;
+}
+
+int16_t PololuA4983::remainingSteps()
+{
+	return m_remaining_steps;
 }
 
 /** Private Methods **/

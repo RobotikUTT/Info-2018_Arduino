@@ -45,6 +45,7 @@ class PololuA4983
 		void update();
 		void stop();
 		bool fifoEmpty();
+		int16_t remainingSteps();
 
 		
 
