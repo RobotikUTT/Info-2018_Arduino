@@ -6,7 +6,6 @@
 
 #include "Arduino.h"
 #include "PololuA4983.h"
-#include "AnySerial.h"
 #include "AX12A.h"
 #include "NeoSWSerial.h"
 #include "QueueList.h"
@@ -20,7 +19,7 @@
 
 #define SERVO_ID 0x01               
 #define SERVO_CONTROL_PIN A5
-#define SERVO_BAUDRATE 38400 
+#define SERVO_BAUDRATE 57600 
 
 #define OPEN_ANGLE		800
 #define CLOSED_ANGLE	700
@@ -29,7 +28,7 @@
 #define MAX_LEVEL 4
 #define UP 	1
 #define DOWN -1*UP
-#define STEP_PER_LEVEL STEP_PER_REVOLUTION*2
+#define STEP_PER_LEVEL STEP_PER_REVOLUTION
 #define LIMIT_SWITCH_PRESSED	HIGH
 
 typedef enum{

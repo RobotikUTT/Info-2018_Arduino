@@ -10,9 +10,9 @@ Pliers::Pliers(PololuA4983* stepper, int limit_switch_pin)
 {
 	m_stepper = stepper;
 	m_limit_switch_pin = limit_switch_pin;
-
+	m_current_level = 0;
 	pinMode(m_limit_switch_pin, INPUT);
-	reset();
+	m_currentAction.done = true;
 }
 
 Pliers::~Pliers()
@@ -25,7 +25,8 @@ Pliers::~Pliers()
 
 void Pliers::update()
 {
-	if (digitalRead(m_limit_switch_pin) == LIMIT_SWITCH_PRESSED)
+	if (digitalRead(m_limit_switch_pin) == LIMIT_SWITCH_PRESSED
+		&& m_stepper->remainingSteps() < 0 )
 	{
 		m_stepper->stop();
 		m_current_level = MIN_LEVEL;
@@ -50,15 +51,21 @@ void Pliers::update()
 				case PREPARING_ELEVATOR:
 				{
 					setLevel(m_currentAction.level+1);
+					//Serial.print("level:");
+					//Serial.println(m_currentAction.level);
 					m_currentAction.phase = PREPARING_PLIERS;
+					Serial.println("done prepare elevator");
 					break;
 				}
 				case PREPARING_PLIERS:
 				{
+					//Serial.println("prepare pliers");
 					if( m_stepper->fifoEmpty() )
 					{
+						// Serial.println("fifo empty here also");
 						open();
 						m_currentAction.phase = ACTION_ELEVATOR;
+						Serial.println("done prepare pliers");
 					}
 					break;
 				}
@@ -66,6 +73,7 @@ void Pliers::update()
 				{
 					setLevel(m_currentAction.level);
 					m_currentAction.phase = ACTION_CUBE;
+					Serial.println("done action elevator");
 					break;
 				}
 				case ACTION_CUBE:
@@ -74,6 +82,7 @@ void Pliers::update()
 					{
 						close();
 						m_currentAction.phase = RESET_ELEVATOR;
+						Serial.println("done action cube");
 					}
 					break;
 				}
@@ -81,6 +90,7 @@ void Pliers::update()
 				{
 					setLevel(m_currentAction.level+1);
 					m_currentAction.done = true;
+					Serial.println("done reset elevator");
 					break;
 				}
 				default:
@@ -126,13 +136,15 @@ void Pliers::update()
 
 void Pliers::reset()
 {
-	m_stepper->moveStep((MAX_LEVEL+1)*STEP_PER_LEVEL*DOWN);
-	m_current_level = MIN_LEVEL;
+	Serial.println("reset");
+	setLevel(MIN_LEVEL);
 }
 
 void Pliers::setLevel(uint8_t level)
 {
 	int8_t dir;
+	//Serial.print("set level ");
+	Serial.println(level);
 	if (level < MIN_LEVEL)
 	{
 		level = MIN_LEVEL;
@@ -149,25 +161,32 @@ void Pliers::setLevel(uint8_t level)
 	{
 		dir = DOWN;
 	}
-	m_stepper->moveStep(dir * level * STEP_PER_LEVEL);
+	int16_t nb_steps;
+	nb_steps = dir * abs(level - m_current_level) * STEP_PER_LEVEL;
+	m_stepper->moveStep(nb_steps);
+	//Serial.print("nb_steps: ");
+	//Serial.println(nb_steps);
 	m_current_level = level;
 }
 
 void Pliers::open()
 {
+	// Serial.println("before open");
+	//delay(10);
 	ax12a.move(SERVO_ID, OPEN_ANGLE);
+	Serial.println("open");
 }
 
 void Pliers::close()
 {
 	ax12a.move(SERVO_ID, CLOSED_ANGLE);
+	Serial.println("close");
 }
 
 void Pliers::begin()
 {
-	NeoSWSerial rs485(AX12_RX,AX12_TX);
-	AnySerial anySerial(&rs485);
-	ax12a.begin(SERVO_BAUDRATE,SERVO_CONTROL_PIN,&anySerial);
+	//NeoSWSerial rs485(AX12_RX,AX12_TX);
+	ax12a.begin(SERVO_BAUDRATE,SERVO_CONTROL_PIN,&Serial);
 	reset();
 }
 
