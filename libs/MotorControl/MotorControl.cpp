@@ -8,6 +8,7 @@
 
 MotorControl::MotorControl(uint8_t enable_pin, uint8_t dir_pin, uint8_t brake_pin, uint8_t foreward_sense)
 {
+	//Serial.println("motor init");
 	m_enable_pin = enable_pin;
 	m_dir_pin = dir_pin;
 	m_brake_pin = brake_pin;
@@ -39,20 +40,23 @@ MotorControl::MotorControl(uint8_t enable_pin, uint8_t dir_pin, uint8_t foreward
 /********************/
 void MotorControl::setSpeed(int pwm)
 {
+	Serial.println("setSpeed");
 	if (pwm < 0)
 	{
+		Serial.println("backward");
 		digitalWrite(m_dir_pin, m_backward_sense);
 		if ( m_brake_pin >0 );
 		{
-			digitalWrite(m_brake_pin, HIGH);
+			digitalWrite(m_brake_pin, m_foreward_sense);
 		}
 	}
 	else
 	{
+		Serial.println("forward");
 		digitalWrite(m_dir_pin, m_foreward_sense);
 		if ( m_brake_pin >0 )
 		{
-			digitalWrite(m_brake_pin, LOW);
+			digitalWrite(m_brake_pin, m_backward_sense);
 		}
 		
 	}
@@ -65,7 +69,7 @@ void MotorControl::stop()
 	analogWrite(m_enable_pin, 0);
 }
 
-void MotorControl::motor_brake()
+void MotorControl::brake()
 {
 	stop();
 	digitalWrite(m_dir_pin, HIGH);

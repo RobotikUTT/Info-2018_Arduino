@@ -29,7 +29,7 @@ class MotorControl
 		void setSpeed(int pwm);
 
 		void stop();
-		void motor_brake();
+		void brake();
 
 
 };
