@@ -52,7 +52,7 @@ typedef enum
 //     CURRENT_PWM =   19,
 //     CURRENT_SPD =   20
 // }canProtocolEnum;
-extern MCP2515 mcp2515;
+extern MCP2515* mcp2515;
 // extern can_frame canTxMsg;
 
 class CanSender

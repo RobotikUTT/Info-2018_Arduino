@@ -34,7 +34,7 @@ void CanSender::canSendTask() {
             canTxMsg.data[i] = dataToSend.pop();
         }
 
-        MCP2515::ERROR txError = mcp2515.sendMessage(&canTxMsg);
+        MCP2515::ERROR txError = mcp2515->sendMessage(&canTxMsg);
         
     }
 }
