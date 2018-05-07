@@ -42,7 +42,7 @@ class LineWatcher
 		LineColor photoState(uint8_t photo_num); //matière en dessous de la photo ; 0 : noir ; 1 : blanc
 		uint16_t photoVal(uint8_t photo_num); //renvoit la valeur de la photo corrigée
 		uint16_t photoRead(uint8_t photo_num); //revoit la valeur de la photo non corrigée
-		uint8_t photoBlackNb();
+		uint8_t photoBlackNb(LineColor color);
 		LinePositionType lineSide();
 
 

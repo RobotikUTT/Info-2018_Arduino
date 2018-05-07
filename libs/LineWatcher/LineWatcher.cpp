@@ -67,7 +67,7 @@ LineColor LineWatcher::photoState(uint8_t photo_num)
 
 LinePositionType LineWatcher::lineSide()
 {
-	if (photoBlackNb() > 2)
+	if (photoBlackNb(WHITE) > 2)
 	{
 		return LINE_CROSSROADS;//croisement detecte
 	}
@@ -81,16 +81,30 @@ LinePositionType LineWatcher::lineSide()
 	}
 }
 
-uint8_t LineWatcher::photoBlackNb()
+uint8_t LineWatcher::photoBlackNb(LineColor color)//nombre photo noirs ou nombre photo gris et noirs
 {
 	uint8_t m_black_nb = 0;
-	for(int i = 0; i <= 4 ; i++)
+	if (color == BLACK)
 	{
-		if (photoState(i) == BLACK)
+		for(int i = 0; i <= 4 ; i++)
 		{
-			m_black_nb++;
+			if (photoState(i) == BLACK)
+			{
+				m_black_nb++;
+			}
 		}
 	}
+	else
+	{
+		for(int i = 0; i <= 4 ; i++)
+		{
+			if ((photoState(i) == BLACK) || (photoState(i) == GREY))
+			{
+				m_black_nb++;
+			}
+		}
+	}
+	
 	return m_black_nb;
 }
 
