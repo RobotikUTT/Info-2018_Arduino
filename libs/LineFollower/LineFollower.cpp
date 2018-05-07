@@ -10,12 +10,12 @@ LineFollower::LineFollower(LineWatcher *watcher, MotorControl *motor)
 {
 	m_watcher = watcher;
 	m_motor = motor;
-	m_direction = FORDWARD;
+	m_direction = FORWARD;
 }
 
 /** Public Methods **/
 /********************/
-void LineFollower::update()
+void LineFollower::update(uint8_t robotState)
 {
 	//numerique :
 	/*switch (m_watcher->lineCase()) {
@@ -29,15 +29,42 @@ void LineFollower::update()
 		m_motor->direction(CENTER);//on va tout droit si on est au centre ou si on ne sait pas
 		break;
 	}*/
-
-	NextCrossroads(m_direction);
+	if (robotState == 0)
+	{
+		m_motor->motorState(robotState);
+	}
+	else
+	{
+		if (m_watcher->lineSide() == LINE_CROSSROADS)
+		{
+			m_direction = LEFT;
+		}
+		else if (m_watcher->photoBlackNb() == 2) //on cherche si uniquement 2 photo sont noirs et espace de 1 photo : 10100 01010 00101
+		{										//cela sert a soir si on est sur la ligne apres le croisement (si on a finit de tourner)
+			uint8_t local_var = 0;
+			for (int i = 0; i < 2; ++i)
+			{
+				if ((m_watcher->photoState(i) == BLACK) && (m_watcher->photoState(i+2) == BLACK))
+				{
+					local_var = 1;
+				}
+			}
+			if (local_var == 1)
+			{
+				m_direction = FORWARD;
+			}
+		}
+		NextCrossroads(m_direction);
+		Serial.print("**");
+		Serial.print(m_direction);
+	}
 }
 
 void LineFollower::NextCrossroads(CrossroadsDirection direction)
 {
 	
 	switch (direction){
-	case FORDWARD:
+	case FORWARD:
 		switch (m_watcher->lineSide()) {
 		case LINE_LEFT:
 			m_motor->analogDirection(RIGHT_LINE, m_watcher->photoVal(0)-m_watcher->photoVal(4));//ligne a gauche : on tourne a droite
@@ -62,7 +89,13 @@ void LineFollower::NextCrossroads(CrossroadsDirection direction)
 			//m_motor->direction(CENTER);//on va tout droit si on est au centre ou si on ne sait pas
 			break;
 		}
-		break;		
+		break;	
+	case LEFT:
+		m_motor->motorCrossroads(LEFT_CROSSROADS);
+		break;
+	case RIGHT:
+		m_motor->motorCrossroads(RIGHT_CROSSROADS);
+		break;	
 	}
 }
 

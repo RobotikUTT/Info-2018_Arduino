@@ -14,7 +14,7 @@ typedef enum{
 	LINE_LEFT,
 	LINE_RIGHT,
 	LINE_CENTER,
-	LINE_CROSSROADS_1
+	LINE_CROSSROADS
 }LinePositionType;
 
 typedef enum{
@@ -42,11 +42,7 @@ class LineWatcher
 		LineColor photoState(uint8_t photo_num); //matière en dessous de la photo ; 0 : noir ; 1 : blanc
 		uint16_t photoVal(uint8_t photo_num); //renvoit la valeur de la photo corrigée
 		uint16_t photoRead(uint8_t photo_num); //revoit la valeur de la photo non corrigée
-		LinePositionType lineCase(); /*renvoit la situation de la ligne :
-		0 : position de correspond a aucun cas
-		1 : sur la ligne
-		2 : robot a gauche de la ligne
-		3 : robot a droite de la ligne*/
+		uint8_t photoBlackNb();
 		LinePositionType lineSide();
 
 

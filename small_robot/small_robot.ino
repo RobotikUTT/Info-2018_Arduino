@@ -16,9 +16,14 @@ LineWatcher watcher(LIGHT_THRESHOLD_WHITE, LIGHT_THRESHOLD_BLACK, PHOTO_0, PHOTO
 Motor leftMotor(LEFT_MOTOR_EN, LEFT_MOTOR_I1, LEFT_MOTOR_I2, LEFT_FOREWARD_SENS);
 Motor rightMotor(RIGHT_MOTOR_EN, RIGHT_MOTOR_I1, RIGHT_MOTOR_I2, RIGHT_FOREWARD_SENS);
 
-MotorControl motor(&leftMotor, &rightMotor, SENSITIVITY, ANALOG_SENSITIVITY, PWM_SPEED);
+MotorControl motor(&leftMotor, &rightMotor, SENSITIVITY, ANALOG_SENSITIVITY, PWM_SPEED, PWM_CROSSROADS_SPEED, PWM_CROSSROADS_INVERSE_SPEED, MAX_PWM_LINE_DIFFERENCE);
 
 LineFollower follower(&watcher, &motor);
+
+uint8_t robotTriggerMemory = HIGH;
+uint8_t e; //var pour trigger (ou bouton si existant)
+
+uint8_t robotState = 0; //0: robot off | 1: robot on
 
 void setup()
 {
@@ -27,6 +32,7 @@ void setup()
 	servoAbeilleVert.attach(SERVO_ABEILLE_VERT);
 	servoPorte.attach(SERVO_PORTE);
 	servoChateauEau.attach(SERVO_CHATEAU_EAU);
+	pinMode(ROBOT_TRIGGER, INPUT);
 }
 
 void loop()
@@ -35,14 +41,23 @@ void loop()
 	{
 		Serial.print(watcher.photoState(i));
 		Serial.print("  /  ");
-		Serial.print(watcher.photoVal(i));
-		Serial.print("  |  ");
+		//Serial.print(watcher.photoVal(i));
+		//Serial.print("  |  ");
 	}
-	follower.update();
+
+	e = digitalRead(ROBOT_TRIGGER);
+	if((e == LOW) && (e != robotTriggerMemory)){
+	    robotState = 1;
+	}
+	robotTriggerMemory = e;
+
+	follower.update(robotState);
 	
 
 	motor.update();
 
+	Serial.print("  *  ");
+	Serial.print(robotState);
 	Serial.println();
 	servoAbeilleVert.write(0);
 	servoAbeilleOrange.write(180);

@@ -57,7 +57,7 @@ LineColor LineWatcher::photoState(uint8_t photo_num)
 	}
 	else if (photoVal(photo_num) >= m_light_threshold_black)
 	{
-		return GREY;
+		return GREY;//pas utilise
 	}
 	else
 	{
@@ -65,35 +65,13 @@ LineColor LineWatcher::photoState(uint8_t photo_num)
 	}
 }
 
-LinePositionType LineWatcher::lineCase()
-{
-	LinePositionType linePos;
-	if ((photoState(0) == WHITE) && (photoState(1) == BLACK) && (photoState(2) == WHITE) && (photoState(3) == BLACK) && (photoState(4) == WHITE))
-	{
-		linePos = LINE_CENTER; //sur la ligne
-	}
-	else if ((photoState(0) == WHITE) && (photoState(1) == WHITE) && /*(photoState(2) == BLACK) && */(photoState(3) == WHITE) && (photoState(4) == BLACK))
-	{
-		linePos = LINE_LEFT; //robot a gauche de la ligne
-	}
-	else if ((photoState(0) == BLACK) && (photoState(1) == WHITE) && /*(photoState(2) == BLACK) && */(photoState(3) == WHITE) &&(photoState(4) == WHITE))
-	{
-		linePos = LINE_RIGHT; //robot a droite de la ligne
-	}
-	else if ((photoState(0) == BLACK) && (photoState(1) == BLACK) && (photoState(2) == BLACK) && (photoState(3) == BLACK) &&(photoState(4) == BLACK))
-	{
-		linePos = LINE_CROSSROADS_1; //robot a intersection 3 croisements (choix entre droite et gauche)
-	}
-	else
-	{
-		linePos = LINE_LOST; //position ne correspond a aucun cas
-	}
-	return linePos;
-}
-
 LinePositionType LineWatcher::lineSide()
 {
-	if (photoVal(0) > photoVal(4))
+	if (photoBlackNb() > 2)
+	{
+		return LINE_CROSSROADS;//croisement detecte
+	}
+	else if (photoVal(0) > photoVal(4))
 	{
 		return LINE_LEFT;//robot a gauche de la ligne
 	}
@@ -101,6 +79,19 @@ LinePositionType LineWatcher::lineSide()
 	{
 		return LINE_RIGHT;//robot a droite de la ligne
 	}
+}
+
+uint8_t LineWatcher::photoBlackNb()
+{
+	uint8_t m_black_nb = 0;
+	for(int i = 0; i <= 4 ; i++)
+	{
+		if (photoState(i) == BLACK)
+		{
+			m_black_nb++;
+		}
+	}
+	return m_black_nb;
 }
 
 uint16_t LineWatcher::photoRead(uint8_t photo_num)

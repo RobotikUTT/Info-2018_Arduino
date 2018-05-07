@@ -29,15 +29,21 @@ class MotorControl
 		int16_t m_right_pwm;
 		uint8_t m_sensitivity;
 		int16_t m_direction;
+		int16_t m_last_direction;
 		int16_t m_pwm;
+		int16_t m_pwm_crossroads;
+		int16_t m_pwm_inverse_crossroads;
 		float m_analog_sensitivity;
+		uint8_t m_max_pwm_line_diffrence;
 
 
 	public:
-		MotorControl(Motor *left_motor, Motor *right_motor, uint8_t sensitivity, float analog_sensitivity, uint8_t pwm_speed);
+		MotorControl(Motor *left_motor, Motor *right_motor, uint8_t sensitivity, float analog_sensitivity, int16_t pwm_speed, int16_t pwm_crossroads_speed, int16_t pwm_crossroads_inverse_speed, uint8_t max_pwm_line_diffrence);
 		//void direction(Direction direction);
 		void analogDirection(Direction direction, uint16_t rotation);
+		void motorCrossroads(Direction direction);
 		void update();
+		void motorState(uint8_t robotState);
 
 };
 

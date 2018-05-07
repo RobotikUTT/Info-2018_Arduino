@@ -13,7 +13,7 @@
 /*************/
 typedef enum{
 	LEFT,
-	FORDWARD,
+	FORWARD,
 	RIGHT,
 	BACKWARD,
 	UNKNOWN
@@ -30,7 +30,7 @@ class LineFollower
 	public:
 		LineFollower(LineWatcher *watcher, MotorControl *motor);
 		void NextCrossroads(CrossroadsDirection direction);
-		void update();
+		void update(uint8_t robotState);
 		CrossroadsDirection m_direction;
 		
 

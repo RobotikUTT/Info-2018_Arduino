@@ -20,4 +20,6 @@
 #define SERVO_PORTE				5
 #define SERVO_CHATEAU_EAU		6
 
+#define ROBOT_TRIGGER	12
+
 #endif
