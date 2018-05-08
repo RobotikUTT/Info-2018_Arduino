@@ -71,7 +71,8 @@ LinePositionType LineWatcher::lineSide()
 	{
 		return LINE_CROSSROADS;//croisement detecte
 	}
-	else if (photoVal(0) > photoVal(4))
+	//else if (photoVal(0) > photoVal(4))
+	else if (photoVal(0) + photoVal(1) > photoVal(3) + photoVal(4))
 	{
 		return LINE_LEFT;//robot a gauche de la ligne
 	}

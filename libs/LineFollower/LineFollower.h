@@ -31,7 +31,7 @@ class LineFollower
 	public:
 		LineFollower(LineWatcher *watcher, MotorControl *motor, uint16_t max_photo_luminosity);
 		void NextCrossroads(CrossroadsDirection direction);
-		void update(uint8_t robotState);
+		void update(uint8_t &robotState);
 		CrossroadsDirection m_direction;
 		
 

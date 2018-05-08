@@ -16,7 +16,7 @@ LineFollower::LineFollower(LineWatcher *watcher, MotorControl *motor, uint16_t m
 
 /** Public Methods **/
 /********************/
-void LineFollower::update(uint8_t robotState)
+void LineFollower::update(uint8_t &robotState)
 {
 	//numerique :
 	/*switch (m_watcher->lineCase()) {
@@ -30,15 +30,27 @@ void LineFollower::update(uint8_t robotState)
 		m_motor->direction(CENTER);//on va tout droit si on est au centre ou si on ne sait pas
 		break;
 	}*/
-	if (robotState == 0)
+	if (robotState == 0) //robot arrete avant depart (jusqu'a trigger)
 	{
 		m_motor->motorState(robotState);
 	}
-	else
+	else if (robotState == 1) //robot recherche ligne
+	{
+		if (m_watcher->photoBlackNb(BLACK) > 0)
+		{
+			robotState = 2;
+		}
+		else
+		{
+			m_motor->analogDirection(CENTER);
+		}
+	}
+
+	if(robotState == 2) //robot suit la ligne en faisant son parcourt
 	{
 		if (m_watcher->lineSide() == LINE_CROSSROADS)
 		{
-			m_direction = LEFT;
+			m_direction = RIGHT;
 		}
 		else if (m_watcher->photoBlackNb(BLACK) == 2) //on cherche si uniquement 2 photo sont noirs et espace de 1 photo : 10100 01010 00101
 		{										//cela sert a soir si on est sur la ligne apres le croisement (si on a finit de tourner)
@@ -63,7 +75,7 @@ void LineFollower::update(uint8_t robotState)
 
 void LineFollower::NextCrossroads(CrossroadsDirection direction)
 {
-	int a = m_watcher->photoVal(2);
+	uint16_t a = m_watcher->photoVal(2);
 	if (m_max_photo_luminosity > a)
 	{
 		m_max_photo_luminosity = a;
@@ -103,7 +115,10 @@ void LineFollower::NextCrossroads(CrossroadsDirection direction)
 		break;
 	case RIGHT:
 		m_motor->motorCrossroads(RIGHT_CROSSROADS);
-		break;	
+		break;
+	case UNKNOWN:
+
+		break;
 	}
 }
 

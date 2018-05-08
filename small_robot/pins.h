@@ -4,9 +4,9 @@
 
 #define PHOTO_0		A0
 #define PHOTO_1		A1
-#define PHOTO_2		A6
-#define PHOTO_3		A2
-#define PHOTO_4		A3
+#define PHOTO_2		A7
+#define PHOTO_3		A3
+#define PHOTO_4		A5
 
 #define LEFT_MOTOR_EN	11
 #define LEFT_MOTOR_I1	7
@@ -20,6 +20,6 @@
 #define SERVO_PORTE				5
 #define SERVO_CHATEAU_EAU		6
 
-#define ROBOT_TRIGGER	12
+#define ROBOT_TRIGGER	22
 
 #endif

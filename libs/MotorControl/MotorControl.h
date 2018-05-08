@@ -40,6 +40,7 @@ class MotorControl
 	public:
 		MotorControl(Motor *left_motor, Motor *right_motor, uint8_t sensitivity, float analog_sensitivity, int16_t pwm_speed, int16_t pwm_crossroads_speed, int16_t pwm_crossroads_inverse_speed, uint8_t max_pwm_line_diffrence);
 		//void direction(Direction direction);
+		void analogDirection(Direction direction);
 		void analogDirection(Direction direction, uint16_t rotation);
 		void motorCrossroads(Direction direction);
 		void update();

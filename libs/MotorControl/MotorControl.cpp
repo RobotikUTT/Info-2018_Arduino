@@ -65,6 +65,10 @@ MotorControl::MotorControl(Motor *left_motor, Motor *right_motor, uint8_t sensit
 		m_right_pwm = -255;
 	}
 }*/
+void MotorControl::analogDirection(Direction direction)
+{
+	analogDirection(direction, 0);
+}
 
 void MotorControl::analogDirection(Direction direction, uint16_t rotation)
 {
@@ -100,12 +104,12 @@ void MotorControl::analogDirection(Direction direction, uint16_t rotation)
 		m_right_pwm = m_right_pwm + m_direction;
 	}*/
 
-	if((abs(m_direction) < 5) && (abs(m_left_pwm - m_right_pwm) > 15))
+	/*if((abs(m_direction) < 5) && (abs(m_left_pwm - m_right_pwm) > 15))
 	{
 		m_left_pwm = (m_right_pwm - m_left_pwm)/2 + m_left_pwm;
 		m_right_pwm = (m_left_pwm - m_right_pwm)/2 + m_right_pwm;
 	}
-	else if(m_direction > 0)
+	else */if(m_direction > 0)
 	{
 		m_left_pwm = m_pwm - 2*m_direction;
 		m_right_pwm = m_pwm + m_direction;
