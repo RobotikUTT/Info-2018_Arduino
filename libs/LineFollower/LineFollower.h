@@ -16,7 +16,8 @@ typedef enum{
 	FORWARD,
 	RIGHT,
 	BACKWARD,
-	UNKNOWN
+	UNKNOWN,
+	FORWARDCROSSROADS
 }CrossroadsDirection;
 
 /** Class Descritpion **/
@@ -27,13 +28,20 @@ class LineFollower
 		LineWatcher* m_watcher;
 		MotorControl* m_motor;
 		uint16_t m_max_photo_luminosity;
+		uint8_t m_crossroads_nb;
+		uint8_t crossroadsEvent;
+		CrossroadsDirection m_next_crossroads;
+		Color* m_color;
+		
 
 	public:
-		LineFollower(LineWatcher *watcher, MotorControl *motor, uint16_t max_photo_luminosity);
+		LineFollower(LineWatcher *watcher, MotorControl *motor, uint16_t max_photo_luminosity, Color *color);
 		void NextCrossroads(CrossroadsDirection direction);
 		void update(uint8_t &robotState);
 		CrossroadsDirection m_direction;
-		
+		uint8_t getCrossroadsNb();
+		CrossroadsDirection getNextCrossroads();
+		void addNextCrossroads(CrossroadsDirection next_crossroads);
 
 };
 

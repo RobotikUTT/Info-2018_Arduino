@@ -67,7 +67,7 @@ LineColor LineWatcher::photoState(uint8_t photo_num)
 
 LinePositionType LineWatcher::lineSide()
 {
-	if (photoBlackNb(WHITE) > 2)
+	if ((photoBlackNb(WHITE) > 2) || ((photoState(0) == BLACK) && (photoState(1) == BLACK)) || ((photoState(1) == BLACK) && (photoState(2) == BLACK)) || ((photoState(2) == BLACK) && (photoState(3) == BLACK)) || ((photoState(3) == BLACK) && (photoState(4) == BLACK)) || ((photoState(2) == BLACK) && (photoBlackNb(WHITE) == 1)))
 	{
 		return LINE_CROSSROADS;//croisement detecte
 	}

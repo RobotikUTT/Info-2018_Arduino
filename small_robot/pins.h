@@ -20,6 +20,13 @@
 #define SERVO_PORTE				5
 #define SERVO_CHATEAU_EAU		6
 
-#define ROBOT_TRIGGER	22
+#define ROBOT_TRIGGER		22
+
+#define COLOR_BUTTON		23
+#define LEFT_FRONT_WALL		25
+#define RIGHT_FRONT_WALL	24
+#define GREEN_LED			53
+#define RED_LED				52
+
 
 #endif
