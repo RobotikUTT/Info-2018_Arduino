@@ -69,6 +69,7 @@
 
 #define	PLIERS_TAKE			1
 #define PLIERS_RELEASE		0
+#define PLIERS_GOTO_LEVEL	2
 
 
 #define SERIAL_HANDSHAKE   'h'

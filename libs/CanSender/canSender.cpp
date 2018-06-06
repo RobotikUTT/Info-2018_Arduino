@@ -34,7 +34,33 @@ void CanSender::canSendTask() {
             canTxMsg.data[i] = dataToSend.pop();
         }
 
-        MCP2515::ERROR txError = mcp2515->sendMessage(&canTxMsg);
+        MCP2515::ERROR can_error = mcp2515->sendMessage(&canTxMsg);
+        // Serial.println("tx");
+        // switch( can_error )
+        // {
+        //     case MCP2515::ERROR_FAIL:
+        //         Serial.println("can error");
+        //         break;
+
+        //     case MCP2515:: ERROR_ALLTXBUSY:
+        //     Serial.println("can tx busy");
+        //         break;
+
+        //     case MCP2515::ERROR_FAILINIT:
+        //         Serial.println("can fail init");
+        //         break;
+
+        //     case MCP2515::ERROR_FAILTX:
+        //         Serial.println("can fail tx");
+        //         break;
+
+        //     case MCP2515::ERROR_NOMSG:
+        //         Serial.println("can no msg");
+        //         break;
+
+        //     default:
+        //         break;
+        // }
         
     }
 }

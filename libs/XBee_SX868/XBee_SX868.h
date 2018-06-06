@@ -5,7 +5,7 @@
 /**************/
 
 #include "Arduino.h"
-#include <AnySerial.h>
+//#include <AnySerial.h>
 #include <NeoSWSerial.h>
 
 /** Defines **/
@@ -30,7 +30,7 @@ void setChannel(int);
 class XBee_SX868
 {
 	private:
-		AnySerial* m_serial;
+		NeoSWSerial* m_serial;
 		bool isBusy; //variable qui définit si le XBee est occupé ou non
 		bool new_data;
 		byte frame_ID[2] = {'I', 'D'}; //initialisation de l'ID de la trame à envoyer
@@ -47,7 +47,7 @@ class XBee_SX868
 		void decodeFrame(void);  //décoder la trame reçue du XBee
 
 	public:
-		XBee_SX868(AnySerial* anySerial);
+		XBee_SX868(NeoSWSerial* softSerial);
 		~XBee_SX868();
 
 		void setChannel(uint8_t mode); //définir le channel utilisé par le XBee

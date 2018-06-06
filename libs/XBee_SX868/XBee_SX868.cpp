@@ -7,9 +7,9 @@
 /** Constructor **/
 /*****************/
 
-XBee_SX868::XBee_SX868(AnySerial* anySerial)
+XBee_SX868::XBee_SX868(NeoSWSerial* softSerial)
 {
-  m_serial = anySerial;
+  m_serial = softSerial;
   // if (!m_serial)
   //  m_serial->begin(57600);
   // delay(50);
@@ -42,9 +42,9 @@ XBee_SX868::~XBee_SX868()
 
 
 void XBee_SX868::setChannel(uint8_t mode){  //Paramétrage du channel radio
-  //Serial.println("Until then it's fine");
+  Serial.println("Until then it's fine");
   openATmode(); //Ouverture du mode commande
-  //Serial.println("still OK");
+  Serial.println("still OK");
   m_serial->write('A');  //Commande permettant de modifier le channel d'émission
   m_serial->write('T');
   m_serial->write('C');
@@ -308,14 +308,15 @@ bool XBee_SX868::dataAvailable()
 /** Private Methods **/
 /*********************/
 void XBee_SX868::openATmode(void){  //Ouverture du mode AT
-  //Serial.println("Hello handsome");
+  Serial.println("Hello handsome");
+  delay(100);
   while(m_serial->available())
   {
-    //Serial.println("while available");
+    Serial.println("while available");
     m_serial->read();
   } //On vide le buffer m_serial
   while(!m_serial->available()){ //Tant que le module ne répond pas OK, on continue à demander le mode AT
-    //Serial.println("writing");
+    Serial.println("writing");
     m_serial->write('+');  //Commande pour déclencher le mode AT
     m_serial->write('+');
     m_serial->write('+');

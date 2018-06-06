@@ -14,6 +14,7 @@ HC_SR04::HC_SR04(int trigger_pin, int echo_pin)
 
 	pinMode(m_trigger_pin, OUTPUT);
 	pinMode(m_echo_pin, INPUT);
+	m_activated = true;
 	
 	init();
 	m_measurement_start = 0;

@@ -13,16 +13,21 @@ PololuA4983::PololuA4983(int step_pin, int dir_pin, int en_pin)
 	m_step_pin = step_pin;
 	m_en_pin = en_pin;
 	m_remaining_steps = 0;
+
 	m_last_step_time = elapsedTime();
 
-	pinMode(m_step_pin, OUTPUT);
-	pinMode(m_dir_pin,  OUTPUT);
-	pinMode(m_en_pin,   OUTPUT);
+	//pinMode(m_step_pin, OUTPUT);
+	//pinMode(m_dir_pin,  OUTPUT);
+	//pinMode(m_en_pin,   OUTPUT);
 
-	digitalWrite(m_step_pin, LOW);
-	digitalWrite(m_dir_pin,  LOW);
+	pinMode(STEPPER_DIR, OUTPUT);
+    pinMode(STEPPER_STEP, OUTPUT);
+
+	digitalWrite(STEPPER_STEP, LOW);
+	digitalWrite(STEPPER_DIR,  LOW);
 	enable();
 	m_flagFifoEmpty = true;
+	m_set_high = false;
 	
 }
 
@@ -45,21 +50,24 @@ void PololuA4983::update()
 {
 	if (m_remaining_steps != 0)
 	{
+		
 		m_flagFifoEmpty = false;
 		if ( m_remaining_steps > 0)
 		{
-			digitalWrite(m_dir_pin, HIGH);
+			digitalWrite(STEPPER_DIR, LOW);
 		}
 		else
 		{
-			digitalWrite(m_dir_pin, LOW);
+			digitalWrite(STEPPER_DIR, HIGH);
 		}
 
 		if (elapsedTime() - m_last_step_time > MIN_DELAY)
 		{
-			if ( digitalRead(m_step_pin) == HIGH )
+			if ( m_set_high )
 			{
-				digitalWrite(m_step_pin, LOW);
+				//Serial.println("low");
+				m_set_high = false;
+				digitalWrite(STEPPER_STEP, LOW);
 				if ( m_remaining_steps > 0)
 				{
 					m_remaining_steps --;
@@ -68,11 +76,15 @@ void PololuA4983::update()
 				{
 					m_remaining_steps ++;
 				}
+				// Serial.print("remaining steps:");
+				// Serial.println(m_remaining_steps);
 
 			}
 			else
 			{
-				digitalWrite(m_step_pin, HIGH);
+				//Serial.println("high");
+				m_set_high = true;
+				digitalWrite(STEPPER_STEP, HIGH);
 			}
 			m_last_step_time = elapsedTime();
 		}
@@ -83,8 +95,10 @@ void PololuA4983::update()
 	{
 		if (m_goalsList.count() > 0)
 		{
+			//Serial.println("new goal");
 			m_remaining_steps = m_goalsList.pop();
 			m_flagFifoEmpty = false;
+			
 			
 		}
 		else
@@ -134,7 +148,10 @@ int16_t PololuA4983::remainingSteps()
 {
 	return m_remaining_steps;
 }
-
+void PololuA4983::init()
+{
+	
+}
 /** Private Methods **/
 /*********************/
 

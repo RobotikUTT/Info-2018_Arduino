@@ -403,7 +403,8 @@ uint8_t encodeFrame(uint8_t* message, uint8_t mode, ...)
         case ORDER_COMPLETED:
         {
             message[0] = ORDER_COMPLETED;
-            message_size = 1;
+            message[1] = 2;
+            message_size = 2;
             break;
         }
 
