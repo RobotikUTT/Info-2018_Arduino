@@ -1,9 +1,9 @@
-#include <SPI.h>
-#include <SoftwareSerial.h>
+//#include <SPI.h>
+//#include <SoftwareSerial.h>
 #include <NeoSWSerial.h>
 #include <AnySerial.h>
 #include "protocol.h"
-#include <mcp2515.h>
+//#include <mcp2515.h>
 #include "XBee_SX868.h"
 #include "SwitchManager.h"
 #define MAX_TAILLE  30
@@ -11,9 +11,9 @@
 #define TX_PIN      12
 
 NeoSWSerial softSerial(RX_PIN,TX_PIN);
-AnySerial XBeeSerial(&softSerial);
+// AnySerial XBeeSerial(&softSerial);
 
-XBee_SX868 XBee(&XBeeSerial);
+XBee_SX868 XBee(&softSerial);
 SwitchManager switchManager;
 
 void lireMessage();
@@ -26,12 +26,16 @@ void setup()
 
 	softSerial.begin(38400);
 	delay(50);
-  Serial.println("begin");
+  Serial.println("abcdefghijklmnopqrstuuvwxyz");
 	int address = switchManager.scanAddress();
 	
 	int channel = switchManager.scanChannel();
+
+  Serial.println("before zigbee");
   delay(50);
 	XBee.setChannel(channel);
+  delay(100);
+  Serial.println("after channel");
 	
 	XBee.setAddress(address);
   Serial.println("Noublie pas d'envoyer un caractere de fin de ligne ;)");
@@ -350,9 +354,7 @@ void lireMessage() {
                 Serial.print("PID ALL\n");
                 encodeFrame(message, PIDALL,p_int,i_int,d_int);
               }
-              Serial.println("about to send");
               XBee.send(message);
-              Serial.println("sent");
               break;
           }
   
@@ -372,14 +374,6 @@ void lireMessage() {
               
               encodeFrame(message, PWM,l,r,t);
               XBee.send(message);
-  
-              Serial.print(l);
-              Serial.print("\n");
-              Serial.print(r);
-              Serial.print("\n");
-              Serial.print(t);
-              Serial.print("\n");
-  
               
               break;
           }
@@ -399,15 +393,6 @@ void lireMessage() {
               
               encodeFrame(message, SET_POS,x,y,a_int);
               XBee.send(message);
-              
-  
-              Serial.print(x);
-              Serial.print("\n");
-              Serial.print(y);
-              Serial.print("\n");
-              Serial.print(a_int);
-              Serial.print("\n");
-  
               break;
           }
   
@@ -427,13 +412,6 @@ void lireMessage() {
               encodeFrame(message, SET_PARAM,s,r_int,a);
               XBee.send(message);
   
-              Serial.print(s);
-              Serial.print("|");
-              Serial.print(r_int);
-              Serial.print("|");
-              Serial.print(a);
-              Serial.println("|");
-              
               break;
           }
             
@@ -489,7 +467,6 @@ void decodeFrame(uint8_t* message)
 
         case SET_MODE:
         {
-            Serial.print("SET MODE|");
             break;
         }
 
@@ -500,14 +477,6 @@ void decodeFrame(uint8_t* message)
             linear   = message[1] << 8 | message[2];
             angular  = message[3] << 8 | message[4];
             duration = message[5] << 8 | message[6];
-            
-            Serial.print("|");
-            Serial.print(linear);
-            Serial.print("|");
-            Serial.print(angular);
-            Serial.print("|");
-            Serial.print(duration);
-            Serial.println("|");
             
             break;
         }
@@ -520,11 +489,6 @@ void decodeFrame(uint8_t* message)
             left_wheel_dist  = message[1] << 8 | message[2];
             right_wheel_dist = message[3] << 8 | message[4];
 
-            Serial.print("l wheel dist ");
-            Serial.println(left_wheel_dist);
-            Serial.print("r wheel dist");
-            Serial.println(left_wheel_dist);
-            
             break;
         }
 
@@ -597,13 +561,6 @@ void decodeFrame(uint8_t* message)
             angle_int   = message[5] << 8 | message[6];
             direction   = message[7];
 
-            Serial.println("GOTOA");
-            Serial.print("x ");
-            Serial.println(x);
-            Serial.print("y ");
-            Serial.println(y);
-            Serial.print("angle");
-            Serial.println((float)angle_int/FLOAT_PRECISION);
 
             break;
         }
@@ -617,13 +574,6 @@ void decodeFrame(uint8_t* message)
             y           = message[3] << 8 | message[4];
             direction   = message[5];
             
-            Serial.println("GOTO");
-            Serial.print("x ");
-            Serial.println(x);
-            Serial.print("y ");
-            Serial.println(y);
-            Serial.print("direction");
-            Serial.println(direction);
             break;
         }
 
@@ -631,9 +581,6 @@ void decodeFrame(uint8_t* message)
         {
             int angle_int;
             angle_int = message[1] << 8 | message[2];
-            Serial.println("ROT");
-            Serial.print("angle ");
-            Serial.println((float)angle_int/FLOAT_PRECISION);
             break;
         }
 
@@ -641,9 +588,6 @@ void decodeFrame(uint8_t* message)
         {
             int angle_int;
             angle_int = message[1] << 8 | message[2];
-            Serial.println("ROT NO MODULO");
-            Serial.print("angle ");
-            Serial.println((float)angle_int/FLOAT_PRECISION);
             break;
         }
 
@@ -669,12 +613,6 @@ void decodeFrame(uint8_t* message)
                 Serial.println("PID ALL");
             }
 
-            Serial.print("p ");
-            Serial.println(p);
-            Serial.print("i ");
-            Serial.println(i);
-            Serial.print("d ");
-            Serial.println(d);
             break;
         }
 
@@ -738,14 +676,6 @@ void decodeFrame(uint8_t* message)
             max_angular_speed = message[3] << 8 | message[4];
             max_acceleration  = message[5] << 8 | message[6];
 
-            Serial.println("SET PARAM");
-            Serial.print("max lin spd ");
-            Serial.println(max_linear_speed);
-            Serial.print("max ang spd ");
-            Serial.println(max_angular_speed);
-            Serial.print("max acc");
-            Serial.println(max_acceleration);
-            
             break;
         }
 
@@ -767,36 +697,36 @@ void decodeFrame(uint8_t* message)
             break;
         }
 
-        case MOVE_PLIERS :
-        {
-            unsigned char level;
-            level = message[1];
+        // case MOVE_PLIERS :
+        // {
+        //     unsigned char level;
+        //     level = message[1];
 
-            Serial.println("MOVE PLIERS");
-            Serial.print("lvl ");
-            Serial.println(level);
+        //     Serial.println("MOVE PLIERS");
+        //     Serial.print("lvl ");
+        //     Serial.println(level);
 
         
             
-            break;
-        }
+        //     break;
+        // }a
 
-        case CLOSE_OPEN_PLIERS :
-        {
-            unsigned char order;
-            order = message[1];
-            if ( order > 0 )
-            {
-                Serial.println("CLOSE PLIERS");
-            }
-            else
-            {
-                Serial.println("OPEN PLIERS");
-            }
+        // case CLOSE_OPEN_PLIERS :
+        // {
+        //     unsigned char order;
+        //     order = message[1];
+        //     if ( order > 0 )
+        //     {
+        //         Serial.println("CLOSE PLIERS");
+        //     }
+        //     else
+        //     {
+        //         Serial.println("OPEN PLIERS");
+        //     }
             
             
-            break;
-        }
+        //     break;
+        // }
 
         case SONAR_DISTANCE :
         {
