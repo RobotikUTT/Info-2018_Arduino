@@ -3,7 +3,7 @@
 
 #define ENABLE LOW
 #define DISABLE HIGH
-#define MIN_DELAY 1000//5000//2000 //us //350
+//#define MIN_DELAY 4000//5000//2000 //us //350
 #define STEP_PER_REVOLUTION 200
 
 /** Includes **/
@@ -25,13 +25,13 @@ class PololuA4983
 		int16_t m_en_pin;
 		uint32_t m_last_step_time;
 		int16_t m_remaining_steps;
-		int16_t m_position_step;
 		uint32_t elapsedTime();
+		uint16_t m_min_delay;
 
 
 	public:
-		PololuA4983(int step_pin, int dir_pin, int en_pin);
-		PololuA4983(int step_pin, int dir_pin);
+		PololuA4983(int step_pin, int dir_pin, int en_pin, uint16_t min_delay);
+		PololuA4983(int step_pin, int dir_pin, uint16_t min_delay);
 		~PololuA4983();
 		void moveStep(uint16_t nb_steps, bool dir);
 		void moveRevolution(uint16_t nb_rev, bool dir);
@@ -41,7 +41,7 @@ class PololuA4983
 		void update();
 		void stop();
 		int16_t getRemainingStep();
-		int16_t getPositionStep();
+		int16_t m_position_step;
 
 		
 

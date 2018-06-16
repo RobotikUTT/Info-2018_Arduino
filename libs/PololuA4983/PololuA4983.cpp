@@ -7,7 +7,7 @@
 /** Constructor **/
 /*****************/
 
-PololuA4983::PololuA4983(int step_pin, int dir_pin, int en_pin)
+PololuA4983::PololuA4983(int step_pin, int dir_pin, int en_pin, uint16_t min_delay)
 {
 	m_dir_pin  = dir_pin;
 	m_step_pin = step_pin;
@@ -15,6 +15,7 @@ PololuA4983::PololuA4983(int step_pin, int dir_pin, int en_pin)
 	m_remaining_steps = 0;
 	m_position_step = 0;
 	m_last_step_time = elapsedTime();
+	m_min_delay = min_delay;
 
 	pinMode(m_step_pin, OUTPUT);
 	pinMode(m_dir_pin,  OUTPUT);
@@ -26,9 +27,9 @@ PololuA4983::PololuA4983(int step_pin, int dir_pin, int en_pin)
 	
 }
 
-PololuA4983::PololuA4983(int step_pin, int dir_pin)
+PololuA4983::PololuA4983(int step_pin, int dir_pin, uint16_t min_delay)
 {
-	PololuA4983(step_pin,dir_pin,0);
+	PololuA4983(step_pin ,dir_pin ,0 , min_delay);
 }
 
 /*** Destructor **/
@@ -54,7 +55,7 @@ void PololuA4983::update()
 			digitalWrite(m_dir_pin, LOW);
 		}
 
-		if (elapsedTime() - m_last_step_time > MIN_DELAY)
+		if (elapsedTime() - m_last_step_time > m_min_delay)
 		{
 			if ( digitalRead(m_step_pin) == HIGH )
 			{
@@ -135,9 +136,4 @@ uint32_t PololuA4983::elapsedTime()
 int16_t PololuA4983::getRemainingStep()
 {
 	return m_remaining_steps;
-}
-
-int16_t PololuA4983::getPositionStep()
-{
-	return m_position_step;
 }

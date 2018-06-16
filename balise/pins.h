@@ -3,8 +3,8 @@
 #include "Arduino.h"
 
 #define STEPPER_EN_PIN		7
-#define STEPPER_STEP_PIN	12
-#define STEPPER_DIR_PIN		8
+#define STEPPER_STEP_PIN	8
+#define STEPPER_DIR_PIN		12
 
 #define CAPTEUR_PIN			2
 
